@@ -292,10 +292,18 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 
 		try {
 
-			List<List<String>> reportTableData = new ArrayList<>();
+			List<List<String>> reportTableData1 = new ArrayList<>();
+			List<List<String>> reportTableData2 = new ArrayList<>();
+			List<String> reportHeaders1 = new ArrayList<>();
+			List<String> reportHeaders2 = new ArrayList<>();
 
-			reportTableData = DBConnection.getInstance().ListTableItems("hnd_car_stock_info_rep1_v");
-			XSSFWorkbook workbook = ExportDataUtil.createPivotSearchedAndReserved(reportTableData);
+			reportTableData1 = DBConnection.getInstance().ListTableItems("HND_SEARCH_AND_RES__BGD_V");
+			reportTableData2 = DBConnection.getInstance().ListTableItems("HND_SEARCH_AND_RES__BGD2_V");
+			reportHeaders1 = DBConnection.getInstance().GetColumnHeaders("HND_SEARCH_AND_RES__BGD_V");
+			reportHeaders2 = DBConnection.getInstance().GetColumnHeaders("HND_SEARCH_AND_RES__BGD2_V");
+
+			XSSFWorkbook workbook = ExportDataUtil.createPivotSearchedAndReserved(reportTableData1, reportHeaders1);
+			workbook = ExportDataUtil.createSecondPivot(workbook, reportTableData2, reportHeaders2);
 
 			resourceResponse.setContentType("application/x-excel");
 			resourceResponse.setProperty("Content-Disposition", "attachment; filename=RaportRezervariSiInterogari.xlsx");

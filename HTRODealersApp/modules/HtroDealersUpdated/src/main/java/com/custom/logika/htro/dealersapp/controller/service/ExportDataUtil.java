@@ -1,7 +1,6 @@
 
 package com.custom.logika.htro.dealersapp.controller.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -9,6 +8,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataConsolidateFunction;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.util.AreaReference;
@@ -96,12 +96,12 @@ public class ExportDataUtil {
 	}
 
 	// create workbook cu raport searched + rezervari total
-	public static XSSFWorkbook exportToExcel2(List<List<String>> ItemsList) {
+	public static XSSFWorkbook exportToExcel2(List<List<String>> ItemsList, List<String> tableHeaders) {
 
 		// Blank workbook
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		// Create a blank sheet
-		XSSFSheet sheet = workbook.createSheet("HTRO Custom Report1");
+		XSSFSheet sheet = workbook.createSheet("HTRO Report Data");
 
 		// Create a Font for styling header cells
 		XSSFFont headerFont = workbook.createFont();
@@ -120,7 +120,6 @@ public class ExportDataUtil {
 		// create first row with table headers
 		int rownum = 0;
 		XSSFRow row = sheet.createRow(rownum);
-		List<String> tableHeaders = new ArrayList<String>();
 
 		for (int x = 0; x < tableHeaders.size(); x++) {
 			XSSFCell cell = row.createCell(x);
@@ -129,12 +128,11 @@ public class ExportDataUtil {
 		}
 
 		// Adding the rest of the data.
-		System.out.println("ExportRaport1 - ItemsList.size() = " + ItemsList.size());
+		System.out.println("exportToExcel2 - ItemsList.size() = " + ItemsList.size());
 		for (int index = 0; index < ItemsList.size(); index++) {
 			row = sheet.createRow(index + 1);
 			List<String> temp = ItemsList.get(index);
-			// System.out.println("ExportRaport1 - temp.size() = " +
-			// temp.size());
+			// System.out.println("ExportRaport1 - temp.size() = "+temp.size());
 			for (int colIdx = 0; colIdx < temp.size(); colIdx++) {
 				XSSFCell cell = row.createCell(colIdx);
 				cell.setCellValue(temp.get(colIdx));
@@ -146,13 +144,12 @@ public class ExportDataUtil {
 			sheet.autoSizeColumn(i);
 		}
 
-		// Freze pane (start with column 4)
+		// Freze pane (start with column 5)
 		sheet.createFreezePane(5, 0);
 
 		// Filter columns
 		for (int i = sheet.getRow(0).getFirstCellNum(), end = sheet.getRow(0).getLastCellNum(); i < end; i++) {
-			CellRangeAddress cellRangeAddr =
-				new CellRangeAddress(0, 22, sheet.getRow(0).getFirstCellNum(), sheet.getRow(0).getLastCellNum());
+			CellRangeAddress cellRangeAddr = new CellRangeAddress(0, sheet.getLastRowNum(), sheet.getRow(0).getFirstCellNum(), end);
 			sheet.setAutoFilter(cellRangeAddr);
 		}
 
@@ -160,26 +157,32 @@ public class ExportDataUtil {
 	}
 
 	// export raport searched + total rezervari / tip / dealer cu pivot
-	public static XSSFWorkbook createPivotSearchedAndReserved(List<List<String>> ItemsList) {
+	public static XSSFWorkbook createPivotSearchedAndReserved(List<List<String>> ItemsList, List<String> tableHeaders) {
 
 		// Blank workbook
-		XSSFWorkbook my_xlsx_workbook = exportToExcel2(ItemsList);
+		XSSFWorkbook my_xlsx_workbook = exportToExcel2(ItemsList, tableHeaders);
 
 		/* Read Data to be Pivoted - we have only one worksheet */
 		XSSFSheet sheet = my_xlsx_workbook.getSheetAt(0);
 
-		/* Get the reference for Pivot Data */
-		CellReference a1 = new CellReference("A1");
-		CellReference a2 = new CellReference("V734");
+		int firstrow = sheet.getFirstRowNum();
+		int firstcol = sheet.getRow(firstrow).getFirstCellNum();
+		int lastrow = sheet.getLastRowNum();
+		int lastcol = sheet.getRow(lastrow).getLastCellNum();
 
-		AreaReference a = new AreaReference(a1, a2, SpreadsheetVersion.EXCEL2007);
+		/* Get the reference for Pivot Data */
+
+		CellReference firstColCell = new CellReference(firstrow, firstcol);
+		CellReference lastColCell = new CellReference(lastrow, lastcol);
+
+		AreaReference a = new AreaReference(firstColCell, lastColCell, SpreadsheetVersion.EXCEL2007);
 
 		/* Find out where the Pivot Table needs to be placed */
 		CellReference b = new CellReference("B2");
 
 		/* Add a new sheet to create Pivot Table */
 		XSSFSheet pivot_sheet;
-		if (my_xlsx_workbook.getSheet("pivot") != null) {
+		if (my_xlsx_workbook.getSheet("Raport-Interogari+Rezervari") != null) {
 			my_xlsx_workbook.removeSheetAt(my_xlsx_workbook.getSheetIndex("Raport-Interogari+Rezervari"));
 			pivot_sheet = my_xlsx_workbook.createSheet("Raport-Interogari+Rezervari");
 		}
@@ -191,17 +194,124 @@ public class ExportDataUtil {
 		XSSFPivotTable pivotTable = pivot_sheet.createPivotTable(a, b, sheet);
 
 		/* customizeaza pivotul */
-		pivotTable.addRowLabel(4);
-		pivotTable.addRowLabel(2);
+		pivotTable.addRowLabel(2);// model short desc
+		pivotTable.addRowLabel(1);// model desc
 
-		pivotTable.addColumnLabel(DataConsolidateFunction.COUNT, 0, "Numar rezervari");
-		pivotTable.addColumnLabel(DataConsolidateFunction.COUNT, 0, "Numar interogari");
+		pivotTable.addColumnLabel(DataConsolidateFunction.COUNT, 1, "Count of Models");
 
-		int colDescr = 11;
+		int colDescr = 0; // perioada
+		int colDescr2 = 3; // tip
 		addColLabel(pivotTable, colDescr, my_xlsx_workbook);
+		addColLabel(pivotTable, colDescr2, my_xlsx_workbook);
 
 		// adauga filtru dupa dealer
-		pivotTable.addReportFilter(1);
+		pivotTable.addReportFilter(4); // dealer
+
+		return my_xlsx_workbook;
+	}
+
+	// create workbook cu raport free stoc cars + last production date.
+	public static XSSFWorkbook exportToExcel3(XSSFWorkbook workbook, List<List<String>> ItemsList, List<String> tableHeaders) {
+
+		// Create a blank sheet
+		XSSFSheet sheet = workbook.createSheet("HTRO Report Data2");
+
+		// Create a Font for styling header cells
+		XSSFFont headerFont = workbook.createFont();
+		headerFont.setFontName("Calibri");
+		headerFont.setFontHeightInPoints((short) 10);
+		headerFont.setColor(IndexedColors.BLACK.index);
+
+		// Create a CellStyle with the font
+		XSSFCellStyle headerCellStyle = workbook.createCellStyle();
+		headerCellStyle.setFont(headerFont);
+
+		// create first row with table headers
+		int rownum = 0;
+		XSSFRow row = sheet.createRow(rownum);
+
+		for (int x = 0; x < tableHeaders.size(); x++) {
+			XSSFCell cell = row.createCell(x);
+			cell.setCellValue(tableHeaders.get(x));
+			cell.setCellStyle(headerCellStyle);
+		}
+
+		// Adding the rest of the data.
+		System.out.println("exportToExcel3 - ItemsList.size() = " + ItemsList.size());
+		for (int index = 0; index < ItemsList.size(); index++) {
+			row = sheet.createRow(index + 1);
+			List<String> temp = ItemsList.get(index);
+			// System.out.println("ExportRaport1 - temp.size() = "+temp.size());
+			for (int colIdx = 0; colIdx < temp.size(); colIdx++) {
+				XSSFCell cell = row.createCell(colIdx);
+				cell.setCellValue(temp.get(colIdx));
+			}
+		}
+
+		// Resize all columns to fit the content size
+		for (int i = 0; i < tableHeaders.size(); i++) {
+			sheet.autoSizeColumn(i);
+		}
+
+		// Freze pane (start with column 5)
+		sheet.createFreezePane(5, 0);
+
+		// Filter columns
+		for (int i = sheet.getRow(0).getFirstCellNum(), end = sheet.getRow(0).getLastCellNum(); i < end; i++) {
+			CellRangeAddress cellRangeAddr = new CellRangeAddress(0, sheet.getLastRowNum(), sheet.getRow(0).getFirstCellNum(), end);
+			sheet.setAutoFilter(cellRangeAddr);
+		}
+
+		return workbook;
+	}
+
+	// export raport cu al 2-lea pivot cu masini free si last production month
+	public static XSSFWorkbook createSecondPivot(XSSFWorkbook my_xlsx_workbook, List<List<String>> ItemsList, List<String> tableHeaders) {
+
+		// Blank workbook
+		my_xlsx_workbook = exportToExcel3(my_xlsx_workbook, ItemsList, tableHeaders);
+
+		/* Read Data to be Pivoted - we have only one worksheet */
+		XSSFSheet sheet = my_xlsx_workbook.getSheet("HTRO Report Data2");
+
+		int firstrow = sheet.getFirstRowNum();
+		int firstcol = sheet.getRow(firstrow).getFirstCellNum();
+		int lastrow = sheet.getLastRowNum();
+		int lastcol = sheet.getRow(lastrow).getLastCellNum();
+
+		/* Get the reference for Pivot Data */
+
+		CellReference firstColCell = new CellReference(firstrow, firstcol);
+		CellReference lastColCell = new CellReference(lastrow, lastcol);
+
+		AreaReference a = new AreaReference(firstColCell, lastColCell, SpreadsheetVersion.EXCEL2007);
+
+		/* Find out where the Pivot Table needs to be placed */
+		CellReference b = new CellReference("B2");
+
+		/* Add a new sheet to create Pivot Table */
+		XSSFSheet pivot_sheet;
+		if (my_xlsx_workbook.getSheet("RaportFreeStoc") != null) {
+			my_xlsx_workbook.removeSheetAt(my_xlsx_workbook.getSheetIndex("RaportFreeStoc"));
+			pivot_sheet = my_xlsx_workbook.createSheet("RaportFreeStoc");
+		}
+		else {
+			pivot_sheet = my_xlsx_workbook.createSheet("RaportFreeStoc");
+		}
+
+		/* Create Pivot Table on a separate worksheet */
+		XSSFPivotTable pivotTable = pivot_sheet.createPivotTable(a, b, sheet);
+
+		/* customizeaza pivotul */
+		pivotTable.addRowLabel(2);// model short desc
+		pivotTable.addRowLabel(1);// model desc
+
+		pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 3, "Sum of Last Production Month");
+		pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 0, "Sum of Confirmed Production Stock");
+		CreationHelper createHelper = my_xlsx_workbook.getCreationHelper();
+		XSSFCellStyle dateStyle = my_xlsx_workbook.createCellStyle();
+		dateStyle.setDataFormat(createHelper.createDataFormat().getFormat("mm/yyyy")); // date
+		pivot_sheet.setDefaultColumnStyle(2, dateStyle);
 
 		return my_xlsx_workbook;
 	}

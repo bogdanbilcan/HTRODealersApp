@@ -343,6 +343,11 @@ public class DBConnection {
 							temp = temp.equalsIgnoreCase("null") ? "" : temp;
 							listTableItems.add(temp);
 						}
+						if (resultSet.getMetaData().getColumnType(i) == 1) {
+							String temp = resultSet.getString(i) + "";
+							temp = temp.equalsIgnoreCase("null") ? "" : temp;
+							listTableItems.add(temp);
+						}
 					}
 					tableData.add(listTableItems);
 				}

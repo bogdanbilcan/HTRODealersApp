@@ -299,10 +299,12 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 
 			reportTableData1 = DBConnection.getInstance().ListTableItems("HND_SEARCH_AND_RES__BGD_V");
 			reportTableData2 = DBConnection.getInstance().ListTableItems("HND_SEARCH_AND_RES__BGD2_V");
+
 			reportHeaders1 = DBConnection.getInstance().GetColumnHeaders("HND_SEARCH_AND_RES__BGD_V");
 			reportHeaders2 = DBConnection.getInstance().GetColumnHeaders("HND_SEARCH_AND_RES__BGD2_V");
 
 			XSSFWorkbook workbook = ExportDataUtil.createPivotSearchedAndReserved(reportTableData1, reportHeaders1);
+
 			workbook = ExportDataUtil.createSecondPivot(workbook, reportTableData2, reportHeaders2);
 
 			resourceResponse.setContentType("application/x-excel");
@@ -311,7 +313,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			workbook.write(os);
 			os.close();
 
-			hndApp_log.info("RaportRezervariSiInterogari -Excel demo file written successfully...");
+			hndApp_log.info("RaportRezervariSiInterogari -Excel file written successfully...");
 		}
 		catch (Exception e) {
 			hndApp_log.error("RaportRezervariSiInterogari - Exceptie generata de constructia raportului!!", e);

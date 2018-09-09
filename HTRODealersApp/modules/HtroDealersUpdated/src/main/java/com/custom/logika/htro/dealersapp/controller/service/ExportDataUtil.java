@@ -1,14 +1,18 @@
 
 package com.custom.logika.htro.dealersapp.controller.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.SpreadsheetVersion;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataConsolidateFunction;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.util.AreaReference;
@@ -16,12 +20,14 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFPivotTable;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColFields;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDataFields;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTItems;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTPivotField;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTPivotFields;
@@ -107,7 +113,7 @@ public class ExportDataUtil {
 		XSSFFont headerFont = workbook.createFont();
 		headerFont.setFontName("Calibri");
 		headerFont.setFontHeightInPoints((short) 10);
-		headerFont.setColor(IndexedColors.BLACK.index);
+		// headerFont.setColor(IndexedColors.BLACK.index);
 
 		// Cell Style for formatting Date
 		// CellStyle dateCellStyle = workbook.createCellStyle();
@@ -145,13 +151,16 @@ public class ExportDataUtil {
 		}
 
 		// Freze pane (start with column 5)
-		sheet.createFreezePane(5, 0);
+		// sheet.createFreezePane(5, 0);
 
 		// Filter columns
-		for (int i = sheet.getRow(0).getFirstCellNum(), end = sheet.getRow(0).getLastCellNum(); i < end; i++) {
-			CellRangeAddress cellRangeAddr = new CellRangeAddress(0, sheet.getLastRowNum(), sheet.getRow(0).getFirstCellNum(), end);
-			sheet.setAutoFilter(cellRangeAddr);
-		}
+		/*
+		 * for (int i = sheet.getRow(0).getFirstCellNum(), end =
+		 * sheet.getRow(0).getLastCellNum(); i < end; i++) { CellRangeAddress
+		 * cellRangeAddr = new CellRangeAddress(0, sheet.getLastRowNum(),
+		 * sheet.getRow(0).getFirstCellNum(), end);
+		 * sheet.setAutoFilter(cellRangeAddr); }
+		 */
 
 		return workbook;
 	}
@@ -167,27 +176,40 @@ public class ExportDataUtil {
 
 		int firstrow = sheet.getFirstRowNum();
 		int firstcol = sheet.getRow(firstrow).getFirstCellNum();
-		int lastrow = sheet.getLastRowNum();
-		int lastcol = sheet.getRow(lastrow).getLastCellNum();
+		int lastrow = sheet.getLastRowNum() - 1;
+		int lastcol = sheet.getRow(lastrow).getLastCellNum() - 1;
+
+		// System.out.println("createPivotSearchedAndReserved - firstrow = " +
+		// firstrow + " firstcol = " + firstcol + " lastrow = " + lastrow +"
+		// lastcol = " + lastcol);
 
 		/* Get the reference for Pivot Data */
 
 		CellReference firstColCell = new CellReference(firstrow, firstcol);
 		CellReference lastColCell = new CellReference(lastrow, lastcol);
 
+		System.out.println(
+			"createPivotSearchedAndReserved - firstColCell = " + firstColCell.formatAsString() + " lastColCell = " +
+				lastColCell.formatAsString());
+
 		AreaReference a = new AreaReference(firstColCell, lastColCell, SpreadsheetVersion.EXCEL2007);
+
+		System.out.println("createPivotSearchedAndReserved - AreaReference = " + a.formatAsString());
 
 		/* Find out where the Pivot Table needs to be placed */
 		CellReference b = new CellReference("B2");
 
+		// System.out.println("createPivotSearchedAndReserved - CellReference =
+		// " + b.formatAsString());
+
 		/* Add a new sheet to create Pivot Table */
-		XSSFSheet pivot_sheet;
-		if (my_xlsx_workbook.getSheet("Raport-Interogari+Rezervari") != null) {
-			my_xlsx_workbook.removeSheetAt(my_xlsx_workbook.getSheetIndex("Raport-Interogari+Rezervari"));
-			pivot_sheet = my_xlsx_workbook.createSheet("Raport-Interogari+Rezervari");
+		XSSFSheet pivot_sheet = null;
+		if (my_xlsx_workbook.getSheet("Raport_Interogari_Rezervari") != null) {
+			my_xlsx_workbook.removeSheetAt(my_xlsx_workbook.getSheetIndex("Raport_Interogari_Rezervari"));
+			pivot_sheet = my_xlsx_workbook.createSheet("Raport_Interogari_Rezervari");
 		}
 		else {
-			pivot_sheet = my_xlsx_workbook.createSheet("Raport-Interogari+Rezervari");
+			pivot_sheet = my_xlsx_workbook.createSheet("Raport_Interogari_Rezervari");
 		}
 
 		/* Create Pivot Table on a separate worksheet */
@@ -197,8 +219,6 @@ public class ExportDataUtil {
 		pivotTable.addRowLabel(2);// model short desc
 		pivotTable.addRowLabel(1);// model desc
 
-		pivotTable.addColumnLabel(DataConsolidateFunction.COUNT, 1, "Count of Models");
-
 		int colDescr = 0; // perioada
 		int colDescr2 = 3; // tip
 		addColLabel(pivotTable, colDescr, my_xlsx_workbook);
@@ -206,6 +226,8 @@ public class ExportDataUtil {
 
 		// adauga filtru dupa dealer
 		pivotTable.addReportFilter(4); // dealer
+
+		pivotTable.addColumnLabel(DataConsolidateFunction.COUNT, 5, "Suma_Automobile");
 
 		return my_xlsx_workbook;
 	}
@@ -220,11 +242,17 @@ public class ExportDataUtil {
 		XSSFFont headerFont = workbook.createFont();
 		headerFont.setFontName("Calibri");
 		headerFont.setFontHeightInPoints((short) 10);
-		headerFont.setColor(IndexedColors.BLACK.index);
+		// headerFont.setColor(IndexedColors.BLACK.index);
 
 		// Create a CellStyle with the font
 		XSSFCellStyle headerCellStyle = workbook.createCellStyle();
 		headerCellStyle.setFont(headerFont);
+
+		// Cell Style for formatting Date
+		XSSFCellStyle dateCellStyle = workbook.createCellStyle();
+		XSSFCreationHelper createHelper = workbook.getCreationHelper();
+		short dateFormat = createHelper.createDataFormat().getFormat("mmm-yy");
+		dateCellStyle.setDataFormat(dateFormat);
 
 		// create first row with table headers
 		int rownum = 0;
@@ -244,7 +272,21 @@ public class ExportDataUtil {
 			// System.out.println("ExportRaport1 - temp.size() = "+temp.size());
 			for (int colIdx = 0; colIdx < temp.size(); colIdx++) {
 				XSSFCell cell = row.createCell(colIdx);
-				cell.setCellValue(temp.get(colIdx));
+				if (colIdx == temp.size() - 1) {
+					SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
+					try {
+						Date date = formatter.parse(temp.get(colIdx));
+						cell.setCellValue(date);
+						cell.setCellStyle(dateCellStyle);
+					}
+					catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else {
+					cell.setCellValue(temp.get(colIdx));
+				}
 			}
 		}
 
@@ -254,14 +296,16 @@ public class ExportDataUtil {
 		}
 
 		// Freze pane (start with column 5)
-		sheet.createFreezePane(5, 0);
+		// sheet.createFreezePane(5, 0);
 
 		// Filter columns
-		for (int i = sheet.getRow(0).getFirstCellNum(), end = sheet.getRow(0).getLastCellNum(); i < end; i++) {
-			CellRangeAddress cellRangeAddr = new CellRangeAddress(0, sheet.getLastRowNum(), sheet.getRow(0).getFirstCellNum(), end);
-			sheet.setAutoFilter(cellRangeAddr);
-		}
-
+		/*
+		 * for (int i = sheet.getRow(0).getFirstCellNum(), end =
+		 * sheet.getRow(0).getLastCellNum(); i < end; i++) { CellRangeAddress
+		 * cellRangeAddr = new CellRangeAddress(0, sheet.getLastRowNum(),
+		 * sheet.getRow(0).getFirstCellNum(), end);
+		 * sheet.setAutoFilter(cellRangeAddr); }
+		 */
 		return workbook;
 	}
 
@@ -276,8 +320,8 @@ public class ExportDataUtil {
 
 		int firstrow = sheet.getFirstRowNum();
 		int firstcol = sheet.getRow(firstrow).getFirstCellNum();
-		int lastrow = sheet.getLastRowNum();
-		int lastcol = sheet.getRow(lastrow).getLastCellNum();
+		int lastrow = sheet.getLastRowNum() - 1;
+		int lastcol = sheet.getRow(lastrow).getLastCellNum() - 1;
 
 		/* Get the reference for Pivot Data */
 
@@ -306,12 +350,17 @@ public class ExportDataUtil {
 		pivotTable.addRowLabel(2);// model short desc
 		pivotTable.addRowLabel(1);// model desc
 
-		pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 3, "Sum of Last Production Month");
-		pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 0, "Sum of Confirmed Production Stock");
-		CreationHelper createHelper = my_xlsx_workbook.getCreationHelper();
-		XSSFCellStyle dateStyle = my_xlsx_workbook.createCellStyle();
-		dateStyle.setDataFormat(createHelper.createDataFormat().getFormat("mm/yyyy")); // date
-		pivot_sheet.setDefaultColumnStyle(2, dateStyle);
+		pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 0, "CONFIRMED_STOCK");
+		pivotTable.addColumnLabel(DataConsolidateFunction.SUM, 3, "LAST_PRODUCTION_MONTH");
+
+		// https://stackoverflow.com/questions/40511928/how-to-set-pivottable-field-number-format-cell-with-apache-poi
+
+		long fieldIndex = 3;
+		long numFmtId = 17; // 17 mmm-yy
+		Optional.ofNullable(pivotTable.getCTPivotTableDefinition().getDataFields()).map(CTDataFields::getDataFieldList).map(
+			List::stream).ifPresent(
+				stream -> stream.filter(dataField -> dataField.getFld() == fieldIndex).findFirst().ifPresent(
+					dataField -> dataField.setNumFmtId(numFmtId)));
 
 		return my_xlsx_workbook;
 	}

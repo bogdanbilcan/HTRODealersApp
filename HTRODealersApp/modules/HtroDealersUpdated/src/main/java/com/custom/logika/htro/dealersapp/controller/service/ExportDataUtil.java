@@ -284,6 +284,9 @@ public class ExportDataUtil {
 						e.printStackTrace();
 					}
 				}
+				else if (colIdx == 0) {
+					cell.setCellValue(Integer.parseInt(temp.get(colIdx)));
+				}
 				else {
 					cell.setCellValue(temp.get(colIdx));
 				}

@@ -313,7 +313,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			workbook.write(os);
 			os.close();
 
-			hndApp_log.info("RaportRezervariSiInterogari -Excel file written successfully...");
+			hndApp_log.info("RaportRezervariSiInterogari - Excel file written successfully...");
 		}
 		catch (Exception e) {
 			hndApp_log.error("RaportRezervariSiInterogari - Exceptie generata de constructia raportului!!", e);

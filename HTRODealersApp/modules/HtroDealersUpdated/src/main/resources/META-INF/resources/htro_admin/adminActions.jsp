@@ -49,12 +49,17 @@ jQuery(document).ready(function() {
 		<portlet:param name="mvcPath" value="/htro_stoc/viewStoc.jsp"></portlet:param>
 	</liferay-portlet:renderURL>
 
+	<liferay-portlet:renderURL var="portofoliuURL">
+		<portlet:param name="mvcPath" value="/htro_portofoliu/viewPortofoliu.jsp" />
+	</liferay-portlet:renderURL>
+
 	<liferay-portlet:actionURL name="createUserGroups" var="createUserGroupsURL" />
 	<liferay-portlet:actionURL name="setEmails" var="setEmailsURL" />
 	<liferay-portlet:actionURL name="updateUserGroups" var="updateUserGroupsURL" />
 
 	<div style="float: right;">
-		<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocURL.toString()%>" value="<%="Deschide Stoc"%>" />
+		<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocURL.toString()%>" value="<%="Inapoi la Stoc"%>" />
+		<aui:button cssClass="btn btn-info btn-large" onClick="<%=portofoliuURL.toString()%>" value="Inapoi la Portofoliu" />
 	</div>
 
 	<aui:form action="<%=setEmailsURL.toString()%>" method="POST" name="setEmailsAddrs">
@@ -70,14 +75,15 @@ jQuery(document).ready(function() {
 					Group test = themeDisplay.getLayout().getGroup();
 					adrese = (String) test.getExpandoBridge().getAttribute(EmailAddresses);
 			%>
-			<aui:input id="emailAddresses" type="textarea" name="emailAddresses" label="<%="Adrese Email pentru cereri"%>" value="<%=adrese%>" />
+			<aui:input id="emailAddresses" type="textarea" name="emailAddresses" autoSize="true"
+				label="<%="Adrese Email pentru cererile Proforma si Transport din Portofoliu:"%>" value="<%=adrese%>" />
 		</div>
 
 	</aui:form>
 
 	<aui:form action="<%=createUserGroupsURL.toString()%>" method="POST" name="createUserGrps">
 		<div style="float: right;">
-			<aui:button id="createUserGr" type="submit" value="<%="Create User Groups"%>" />
+			<aui:button id="createUserGr" type="submit" value="<%="Creare initiala User Groups"%>" />
 		</div>
 	</aui:form>
 

@@ -22,7 +22,7 @@ AUI.$ = jQuery.noConflict();
 jQuery(document).ready(function() {
 	var table = jQuery('#portofoliu').DataTable(
     		{
-    			scrollY: 600,
+    			scrollY: 700,
     			lengthMenu: [[50, 75, 100, -1], [50, 75, 100, "All"]],
     		    paging: true,
     		    scrollX: true,
@@ -135,50 +135,49 @@ table.columns([1,10,16]).every(function() {
 			isAdmin = true;
 		}
 	}
-	
+
 	if (!isAdmin) {
 		System.out.println("ViewPorofoliu - Logged in user is Not Admin");
 	}
 
 	//String dealerIdValue = (String) currentUser.getExpandoBridge().getAttribute("DealerId");
 	//System.out.println("dealerIdValue read = " + dealerIdValue);
-	
+
 	String dealerIdValue = "";
 	String tipAutoveh = "";
 	String tipFinal = "";
 	String customField = "TipAutovehicule";
 	List<UserGroup> usrGrps = currentUser.getUserGroups();
 
-	if (!usrGrps.isEmpty())
-	{
-		for (UserGroup usrGrp : usrGrps)
-		{
-			dealerIdValue +=usrGrp.getDescription() + ",";
+	if (!usrGrps.isEmpty()) {
+		for (UserGroup usrGrp : usrGrps) {
+			dealerIdValue += usrGrp.getDescription() + ",";
 			String[] TipAutovehicule = (String[]) usrGrp.getExpandoBridge().getAttribute(customField);
 			String test = String.join("", TipAutovehicule);
-			tipAutoveh +=test+",";
+			tipAutoveh += test + ",";
 		}
-		
-		dealerIdValue = dealerIdValue.substring(0, dealerIdValue.length()-1);
-		tipAutoveh = tipAutoveh.substring(0, tipAutoveh.length()-1);
-		
-		if(tipAutoveh.contains("Motociclete")){
+
+		dealerIdValue = dealerIdValue.substring(0, dealerIdValue.length() - 1);
+		tipAutoveh = tipAutoveh.substring(0, tipAutoveh.length() - 1);
+
+		if (tipAutoveh.contains("Motociclete")) {
 			tipFinal = "Moto";
-			if(tipAutoveh.contains("Automobile")){
+			if (tipAutoveh.contains("Automobile")) {
 				tipFinal = ""; // gol  == toate 
 			}
-		}else if(tipAutoveh.contains("Automobile")){
+		} else if (tipAutoveh.contains("Automobile")) {
 			tipFinal = "Auto";
 		}
-		
-		System.out.println("portofoliu - usrGrps dealerIdValue = "+dealerIdValue);
-		System.out.println("portofoliu - usrGrps custom field = "+tipAutoveh);
-		System.out.println("portofoliu - usrGrps custom field Final = "+tipFinal);
+
+		System.out.println("portofoliu - usrGrps dealerIdValue = " + dealerIdValue);
+		System.out.println("portofoliu - usrGrps custom field = " + tipAutoveh);
+		System.out.println("portofoliu - usrGrps custom field Final = " + tipFinal);
 	}
 
 	String noResults = "Nu s-au gasit automobile in baza de date conform filtrelor aplicate.";
 
-	List<PortofoliuItem> portofoliuItems1 = DBConnection.getInstance().GetAllPortofoliuItems(dealerIdValue,isAdmin,tipFinal);
+	List<PortofoliuItem> portofoliuItems1 = DBConnection.getInstance().GetAllPortofoliuItems(dealerIdValue,
+			isAdmin, tipFinal);
 %>
 
 <liferay-portlet:resourceURL id="exportRaport1" var="exportRaport1URL" />
@@ -187,6 +186,10 @@ table.columns([1,10,16]).every(function() {
 
 <liferay-portlet:renderURL var="stocURL">
 	<portlet:param name="mvcPath" value="/htro_stoc/viewStoc.jsp"></portlet:param>
+</liferay-portlet:renderURL>
+
+<liferay-portlet:renderURL var="adminURL">
+	<portlet:param name="mvcPath" value="/htro_admin/adminActions.jsp"></portlet:param>
 </liferay-portlet:renderURL>
 
 <liferay-portlet:actionURL name="VerificaCheckboxes" var="verificaCheckboxesURL" />
@@ -215,9 +218,9 @@ table.columns([1,10,16]).every(function() {
 						</button>
 						<ul class="dropdown-menu">
 							<li><aui:button cssClass="btn btn-info" icon="icon-table" onClick="<%= exportRaport1URL.toString() %>"
-									value="<%="HND-Details+Pivot"%>" /></li>
-							<li><aui:button cssClass="btn btn-default" icon="icon-table" onClick="<%= exportRaport2URL.toString() %>"
-									value="<%="Interogari+Rezervari-Per-Dealer"%>" /></li>
+									value="<%="HND-Cars-Details"%>" /></li>
+							<li><aui:button cssClass="btn btn-info" icon="icon-table" onClick="<%= exportRaport2URL.toString() %>"
+									value="<%="Free-Stock+Interogari+Rezervari"%>" /></li>
 						</ul>
 					</div>
 				</c:if>
@@ -226,7 +229,10 @@ table.columns([1,10,16]).every(function() {
 
 				<aui:button id="transmiteCereri" type="submit" value="<%="Transmite Cereri"%>" />
 
-				<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocURL.toString()%>" value="<%="Deschide Stoc"%>" />
+				<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocURL.toString()%>" value="<%="Inapoi la Stoc"%>" />
+				<c:if test="<%=isAdmin%>">
+					<aui:button cssClass="btn btn-info btn-large" onClick="<%=adminURL.toString()%>" value="<%="Pagina Administrare"%>" />
+				</c:if>
 			</div>
 
 			<table id="portofoliu" class="table table-striped table-bordered nowrap" style="width: 100%">
@@ -522,5 +528,5 @@ table.columns([1,10,16]).every(function() {
 	</c:if>
 </aui:form>
 <c:if test="<%=Validator.isNull(portofoliuItems1) || portofoliuItems1.isEmpty()%>">
-	<div class="message-container">No data to Display</div>
+	<div class="message-container"><%=noResults%></div>
 </c:if>

@@ -22,7 +22,7 @@ AUI.$ = jQuery.noConflict();
 jQuery(document).ready(function() {
 	var table = jQuery('#stoc').DataTable(
     		{
-    			scrollY: 400,
+    			scrollY: 600,
     			lengthMenu: [[50, 75, 100, -1], [50, 75, 100, "All"]],
     		    paging: true,
     		    scrollX: true,
@@ -190,7 +190,7 @@ jQuery(document).ready(function() {
 			<%-- 			<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocV2URL.toString()%>" value="Deschide StocV2" /> --%>
 			<aui:button cssClass="btn btn-info btn-large" onClick="<%=portofoliuURL.toString()%>" value="Deschide Portofoliu" />
 			<c:if test="<%=isAdmin%>">
-				<aui:button cssClass="btn btn-info btn-large" onClick="<%=adminURL.toString()%>" value="Deschide AdminActions" />
+				<aui:button cssClass="btn btn-info btn-large" onClick="<%=adminURL.toString()%>" value="Deschide Pagina Administrare" />
 			</c:if>
 		</div>
 

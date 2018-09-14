@@ -59,7 +59,7 @@ jQuery(document).ready(function() {
 
 	<div style="float: right;">
 		<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocURL.toString()%>" value="<%="Inapoi la Stoc"%>" />
-		<aui:button cssClass="btn btn-info btn-large" onClick="<%=portofoliuURL.toString()%>" value="<%="Inapoi la Portofoliu" />
+		<aui:button cssClass="btn btn-info btn-large" onClick="<%=portofoliuURL.toString()%>" value="<%="Inapoi la Portofoliu"%>" />
 	</div>
 
 	<aui:form action="<%=setEmailsURL.toString()%>" method="POST" name="setEmailsAddrs">
@@ -68,17 +68,15 @@ jQuery(document).ready(function() {
 			<div style="float: right;">
 				<aui:button id="setEmails" type="submit" value="<%="Set Emails"%>" />
 			</div>
-
 			<%
 				String adrese = "";
-					String EmailAddresses = "EmailAddresses";
-					Group test = themeDisplay.getLayout().getGroup();
-					adrese = (String) test.getExpandoBridge().getAttribute(EmailAddresses);
+				String EmailAddresses = "EmailAddresses";
+				Group test = themeDisplay.getLayout().getGroup();
+				adrese = (String) test.getExpandoBridge().getAttribute(EmailAddresses);
 			%>
 			<aui:input id="emailAddresses" type="textarea" name="emailAddresses" autoSize="true"
 				label="<%="Adrese Email pentru cererile Proforma si Transport din Portofoliu:"%>" value="<%=adrese%>" />
 		</div>
-
 	</aui:form>
 
 	<aui:form action="<%=createUserGroupsURL.toString()%>" method="POST" name="createUserGrps">

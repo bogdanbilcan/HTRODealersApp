@@ -119,6 +119,8 @@ jQuery(document).ready(function() {
 	if (!tipAuto.equalsIgnoreCase("")) {
 		validateStocView = true;
 	}
+
+	boolean validDealerId = !dealerIdValue.contains(",");
 %>
 
 <liferay-portlet:resourceURL id="getTipAuto" var="getTipAutoURL" />
@@ -263,6 +265,10 @@ Liferay.provide(
 	
 
 
+
+
+
+
 <div class="container-fluid">
 
 	<c:if test="<%=validateStocView%>">
@@ -316,7 +322,7 @@ Liferay.provide(
 
 									boolean validateAction = false;
 									boolean showTime = false;
-
+									//validDealerId
 									if (rezervata.equalsIgnoreCase("N")) {
 										if ((nowInUtc.isAfter(endTime)) || (nowInUtc.isBefore(startTime))) {
 											validateAction = false;
@@ -329,9 +335,9 @@ Liferay.provide(
 									}
 					%>
 					<tr>
-						<td><c:if test="<%=showTime%>">
+						<td><c:if test="<%=showTime || validDealerId%>">
 								<span style="white-space: nowrap"> Rezervare dezactivata!! </span>
-							</c:if> <c:if test="<%=validateAction%>">
+							</c:if> <c:if test="<%=validateAction && validDealerId%>">
 
 								<liferay-portlet:renderURL var="rezervaURL">
 									<portlet:param name="carNO" value="<%=String.valueOf(stocItem.getHTRO_CAR_NO())%>" />

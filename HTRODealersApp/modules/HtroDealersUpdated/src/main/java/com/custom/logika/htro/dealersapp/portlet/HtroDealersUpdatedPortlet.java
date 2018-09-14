@@ -233,21 +233,42 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			String tipAuto = ParamUtil.getString(renderRequest, "tipAuto");
 			String culoareExterior = ParamUtil.getString(renderRequest, "culoareExterior");
 			String dealerIdValue = ParamUtil.getString(renderRequest, "dealerIdValue");
-
+			int dealerId = 0;
 			dealerIdValue = dealerIdValue == null ? "0" : dealerIdValue;
+
 			if (tipAuto != null && tipAuto.length() > 0) {
-				int dealerId = Integer.parseInt(dealerIdValue);
+
 				tipAuto = tipAuto.equalsIgnoreCase("SelectAll") ? "" : tipAuto;
 				culoareExterior = culoareExterior.equalsIgnoreCase("SelectAll") ? "" : culoareExterior;
-				try {
-					DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
-					hndApp_log.info("render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
+
+				if (dealerIdValue.contains(",")) {
+					String[] dealersList = dealerIdValue.split(",");
+					for (int i = 0; i < dealersList.length; i++) {
+						dealerId = Integer.parseInt(dealersList[i]);
+						try {
+							DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
+							hndApp_log.info("render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
+						}
+						catch (Exception e) {
+							hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc)- ", e);
+							e.printStackTrace();
+							throw new PortletException(e);
+						}
+					}
 				}
-				catch (Exception e) {
-					hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc)- ", e);
-					e.printStackTrace();
-					throw new PortletException(e);
+				else {
+					dealerId = Integer.parseInt(dealerIdValue);
+					try {
+						DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
+						hndApp_log.info("render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
+					}
+					catch (Exception e) {
+						hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc)- ", e);
+						e.printStackTrace();
+						throw new PortletException(e);
+					}
 				}
+
 			}
 		}
 		catch (Exception e) {
@@ -291,7 +312,6 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 	public void _executeExportRaport2(ResourceRequest resourceRequest, ResourceResponse resourceResponse) {
 
 		try {
-
 			List<List<String>> reportTableData1 = new ArrayList<>();
 			List<List<String>> reportTableData2 = new ArrayList<>();
 			List<String> reportHeaders1 = new ArrayList<>();
@@ -508,13 +528,15 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 
 	public void RezervaAction(ActionRequest request, ActionResponse response) {
 
-		int dealerID = Integer.valueOf(ParamUtil.getString(request, "dealerID"));
 		String userEmail = ParamUtil.getString(request, "userEmail");
 		String tipRezervare = ParamUtil.getString(request, "tipRezervare");
 		String numeClient = ParamUtil.getString(request, "numeClient");
 		String numeVanzator = ParamUtil.getString(request, "numeVanzator");
 		int carNo = Integer.valueOf(ParamUtil.getString(request, "carNo"));
-
+		String dealerIdValue = ParamUtil.getString(request, "dealerID");
+		int dealerID = 0;
+		dealerIdValue = dealerIdValue == null ? "0" : dealerIdValue;
+		dealerID = Integer.parseInt(dealerIdValue);
 		if (tipRezervare.equalsIgnoreCase("Ferma")) {
 			tipRezervare = "FIRM";
 		}

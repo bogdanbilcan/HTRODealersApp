@@ -8,9 +8,21 @@
 
 <%
 	User currentUser = themeDisplay.getUser();
-	String dealerIdValue = (String) currentUser.getExpandoBridge().getAttribute("DealerId");
-	System.out.println("dealerIdValue read = " + dealerIdValue);
+	
+	//String dealerIdValue = (String) currentUser.getExpandoBridge().getAttribute("DealerId");
+	//System.out.println("dealerIdValue read = " + dealerIdValue);
 
+	String dealerIdValue = "";
+	List<UserGroup> usrGrps = currentUser.getUserGroups();
+
+	if (!usrGrps.isEmpty()) {
+		for (UserGroup usrGrp : usrGrps) {
+			dealerIdValue += usrGrp.getDescription() + ",";
+		}
+		dealerIdValue = dealerIdValue.substring(0, dealerIdValue.length() - 1);
+		System.out.println("AdaugaRezervare - usrGrps dealerIdValue = " + dealerIdValue);
+	}
+	
 	/*
 	String[] dealerNameArray = (String[]) currentUser.getExpandoBridge().getAttribute("DealerName");
 	String dealerName = String.join("", dealerNameArray);

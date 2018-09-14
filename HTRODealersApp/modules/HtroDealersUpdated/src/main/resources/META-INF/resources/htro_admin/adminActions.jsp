@@ -59,7 +59,7 @@ jQuery(document).ready(function() {
 
 	<div style="float: right;">
 		<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocURL.toString()%>" value="<%="Inapoi la Stoc"%>" />
-		<aui:button cssClass="btn btn-info btn-large" onClick="<%=portofoliuURL.toString()%>" value="Inapoi la Portofoliu" />
+		<aui:button cssClass="btn btn-info btn-large" onClick="<%=portofoliuURL.toString()%>" value="<%="Inapoi la Portofoliu" />
 	</div>
 
 	<aui:form action="<%=setEmailsURL.toString()%>" method="POST" name="setEmailsAddrs">

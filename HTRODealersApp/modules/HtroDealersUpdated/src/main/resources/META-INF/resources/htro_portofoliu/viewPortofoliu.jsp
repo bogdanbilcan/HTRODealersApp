@@ -231,7 +231,7 @@ table.columns([1,10,16]).every(function() {
 
 				<aui:button cssClass="btn btn-info btn-large" onClick="<%=stocURL.toString()%>" value="<%="Inapoi la Stoc"%>" />
 				<c:if test="<%=isAdmin%>">
-					<aui:button cssClass="btn btn-info btn-large" onClick="<%=adminURL.toString()%>" value="<%="Pagina Administrare"%>" />
+					<aui:button cssClass="btn btn-info btn-large" onClick="<%=adminURL.toString()%>" value="<%="Administrare"%>" />
 				</c:if>
 			</div>
 

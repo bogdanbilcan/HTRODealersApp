@@ -326,7 +326,7 @@ table.columns([1,10,16]).every(function() {
 										// 		System.out.println("tipRezervare =>>>" + tipRezervare);
 									}
 
-									if (tipRezervare.equalsIgnoreCase("Ferma")) {
+									if (tipRezervare.equalsIgnoreCase("Ferma") || tipRezervare.equalsIgnoreCase("Stoc")) {
 										validateAction2 = true;
 										// 		System.out.println("tipRezervare2 =>>>" + tipRezervare);
 									}

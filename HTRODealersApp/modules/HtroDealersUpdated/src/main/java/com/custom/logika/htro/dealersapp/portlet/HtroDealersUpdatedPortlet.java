@@ -46,14 +46,14 @@ import com.liferay.portal.kernel.util.WebKeys;
 /**
  * @author Bogdan Bilcan
  */
-@Component(immediate = true, property = {
-	"com.liferay.portlet.display-category=HTROApps", "javax.portlet.display-name=HTRO Dealers App Updated",
-	"javax.portlet.init-param.template-path=/", "javax.portlet.name=" + HtroDealersUpdatedPortletKeys.HtroDealersUpdated,
-	"javax.portlet.resource-bundle=content.Language", "javax.portlet.security-role-ref=power-user,user",
-	"com.liferay.portlet.display-category=category.HTRODealersApps", "com.liferay.portlet.instanceable=false",
-	"com.liferay.portlet.scopeable=true", "javax.portlet.expiration-cache=0",
-	"javax.portlet.init-param.view-template=/htro_stoc/viewStoc.jsp", "javax.portlet.supports.mime-type=text/html"
-}, service = Portlet.class)
+@Component(immediate = true, property =
+	{
+		"com.liferay.portlet.display-category=HTROApps", "javax.portlet.display-name=HTRO Dealers App Updated",
+		"javax.portlet.init-param.template-path=/", "javax.portlet.name=" + HtroDealersUpdatedPortletKeys.HtroDealersUpdated,
+		"javax.portlet.resource-bundle=content.Language", "javax.portlet.security-role-ref=power-user,user",
+		"com.liferay.portlet.instanceable=false", "com.liferay.portlet.scopeable=true", "javax.portlet.expiration-cache=0",
+		"javax.portlet.init-param.view-template=/htro_stoc/viewStoc.jsp", "javax.portlet.supports.mime-type=text/html"
+	}, service = Portlet.class)
 
 public class HtroDealersUpdatedPortlet extends MVCPortlet {
 
@@ -93,9 +93,10 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 				String name = tipAuto[i];
 				try {
 					UserGroup usrGr = UserGroupServiceUtil.getUserGroup(name);
-					usrGr.getExpandoBridge().setAttribute(tipAutovehicule, new String[] {
-						automobile
-					});
+					usrGr.getExpandoBridge().setAttribute(tipAutovehicule, new String[]
+						{
+							automobile
+						});
 
 					hndApp_log.info("updateUserGroups - setAttribute automobile to " + name);
 				}
@@ -114,9 +115,10 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 				String name = tipMoto[i];
 				try {
 					UserGroup usrGr = UserGroupServiceUtil.getUserGroup(name);
-					usrGr.getExpandoBridge().setAttribute(tipAutovehicule, new String[] {
-						motociclete
-					});
+					usrGr.getExpandoBridge().setAttribute(tipAutovehicule, new String[]
+						{
+							motociclete
+						});
 					hndApp_log.info("updateUserGroups - setAttribute motociclete to " + name);
 				}
 				catch (PortalException e1) {
@@ -134,9 +136,10 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 				String name = tipToate[i];
 				try {
 					UserGroup usrGr = UserGroupServiceUtil.getUserGroup(name);
-					usrGr.getExpandoBridge().setAttribute(tipAutovehicule, new String[] {
-						toate
-					});
+					usrGr.getExpandoBridge().setAttribute(tipAutovehicule, new String[]
+						{
+							toate
+						});
 					hndApp_log.info("updateUserGroups - setAttribute toate to " + name);
 				}
 				catch (PortalException e1) {
@@ -247,7 +250,9 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 						dealerId = Integer.parseInt(dealersList[i]);
 						try {
 							DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
-							hndApp_log.info("render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
+							hndApp_log.info(
+								"Render - DealerMultiplu dealerId - " + dealerId + " - S-a cautat tipAuto = " + tipAuto +
+									" si culoareExterior = " + culoareExterior);
 						}
 						catch (Exception e) {
 							hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc)- ", e);
@@ -260,7 +265,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 					dealerId = Integer.parseInt(dealerIdValue);
 					try {
 						DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
-						hndApp_log.info("render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
+						hndApp_log.info("Render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
 					}
 					catch (Exception e) {
 						hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc)- ", e);
@@ -773,17 +778,17 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 		if (Validator.isNotNull(resourceId)) {
 			System.out.println("resource id found: " + resourceId);
 			switch (resourceId) {
-			case getTipAutoOPERATION:
-				_executeGetTipAuto(resourceRequest, resourceResponse);
-				break;
-			case exportRaport1OPERATION:
-				_executeExportRaport1(resourceRequest, resourceResponse);
-				break;
-			case exportRaport2OPERATION:
-				_executeExportRaport2(resourceRequest, resourceResponse);
-				break;
-			default:
-				System.out.println("Unexpected resource id found: " + resourceId);
+				case getTipAutoOPERATION:
+					_executeGetTipAuto(resourceRequest, resourceResponse);
+					break;
+				case exportRaport1OPERATION:
+					_executeExportRaport1(resourceRequest, resourceResponse);
+					break;
+				case exportRaport2OPERATION:
+					_executeExportRaport2(resourceRequest, resourceResponse);
+					break;
+				default:
+					System.out.println("Unexpected resource id found: " + resourceId);
 			}
 		}
 		else {

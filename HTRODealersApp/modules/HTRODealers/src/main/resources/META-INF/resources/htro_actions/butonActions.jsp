@@ -29,12 +29,6 @@ if (tipRezervare.equalsIgnoreCase("Ferma") || tipRezervare.equalsIgnoreCase("Sto
 
 	}
 
-/* if (tipRezervare.equalsIgnoreCase("Ferma")) {
-		validateAction2 = true;
-
-		// 		System.out.println("tipRezervare2 =>>>" + tipRezervare);
-
-	} */
 %>
 
 <%-- markupView="lexicon" icon="<%= StringPool.BLANK %>" --%>

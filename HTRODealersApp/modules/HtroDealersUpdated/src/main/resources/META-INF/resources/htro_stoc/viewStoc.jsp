@@ -262,12 +262,6 @@ Liferay.provide(
 	    ['aui-io']
 	);
 </aui:script>
-	
-
-
-
-
-
 
 <div class="container-fluid">
 

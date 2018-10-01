@@ -1,0 +1,3 @@
+eclipse.preferences.version=1
+module-start-timeout=300000
+runtimes=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\r\n<runtimes>\r\n  <runtime id\="HTRODealersApp" id-set\="true" location\="C\:/liferayWorkSpace/HTRODealersApp/bundles" name\="HTRODealersApp" runtime-type-id\="com.liferay.ide.server.portal.runtime" timestamp\="0"/>\r\n  <runtime id\="Liferay 7.x" location\="C\:/liferay7ga5" name\="Liferay 7.x" runtime-type-id\="com.liferay.ide.server.portal.runtime" timestamp\="0" vm-install-id\="1530081920481" vm-install-type-id\="org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType"/>\r\n</runtimes>\r\n

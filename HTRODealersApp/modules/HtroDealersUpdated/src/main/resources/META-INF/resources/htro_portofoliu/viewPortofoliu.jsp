@@ -303,8 +303,8 @@ table.columns([1,10,16]).every(function() {
 						for (PortofoliuItem portofoliuItem : portofoliuItems1) {
 									String carNo = String.valueOf(portofoliuItem.getHTRO_CAR_NO());
 									String tipRezervare = portofoliuItem.getTIP_LINIE();
-									String numeVanzator = portofoliuItem.getNUME_CLIENT();
-									String numeClient = portofoliuItem.getNUME_VANZATOR();
+									String numeClient = portofoliuItem.getNUME_CLIENT();
+									String numeVanzator = portofoliuItem.getNUME_VANZATOR();
 									String locatie = portofoliuItem.getLOCATIE();
 
 									//boolean test1 = portofoliuItem.isPROFORMA();

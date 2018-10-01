@@ -1,0 +1,10 @@
+#
+#Thu Sep 27 16:58:29 EEST 2018
+linkedResources=
+managedNatures=
+classpath=<?xml version\="1.0" encoding\="UTF-8"?>\n<classpath>\n</classpath>\n
+subprojectPaths=modules;modules/HTRODealers;modules/HtroDealersUpdated
+derivedResources=.gradle;build;modules/build;modules/HTRODealers/build;modules/HtroDealersUpdated/build
+buildScriptPath=build.gradle
+managedBuilders=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><commands/>
+buildDir=build

@@ -317,6 +317,7 @@ Liferay.provide(
 									boolean validateAction = false;
 									boolean showTime = false;
 									//validDealerId
+									
 									if (rezervata.equalsIgnoreCase("N")) {
 										if ((nowInUtc.isAfter(endTime)) || (nowInUtc.isBefore(startTime))) {
 											validateAction = false;
@@ -329,7 +330,7 @@ Liferay.provide(
 									}
 					%>
 					<tr>
-						<td><c:if test="<%=showTime || validDealerId%>">
+						<td><c:if test="<%=showTime || !validDealerId%>">
 								<span style="white-space: nowrap"> Rezervare dezactivata!! </span>
 							</c:if> <c:if test="<%=validateAction && validDealerId%>">
 

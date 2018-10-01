@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+executionsView.headerDurationColumnWidth=100
+executionsView.headerNameColumnWidth=600
+tasksView.groupTasks=true
+tasksView.headerDescriptionColumnWidth=400
+tasksView.headerNameColumnWidth=160
+tasksView.linkToSelection=true
+tasksView.privateTasksVisible=false
+tasksView.projectTasksVisible=true
+tasksView.sortByType=false
+tasksView.sortByVisibility=false
+tasksView.taskSelectorsVisible=false

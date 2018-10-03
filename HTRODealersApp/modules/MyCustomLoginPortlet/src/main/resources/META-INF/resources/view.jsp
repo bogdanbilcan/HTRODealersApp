@@ -29,6 +29,10 @@
 			<portlet:param name="mvcRenderCommandName" value="/login/login" />
 		</portlet:actionURL>
 		
+		<portlet:actionURL name="/login/login1" var="login1URL">
+			<portlet:param name="mvcRenderCommandName" value="/login/login1" />
+		</portlet:actionURL>
+		
 		<aui:form action="<%= loginURL %>" autocomplete='on' cssClass="sign-in-form" method="post" name="loginForm">
 		
 			<aui:input name="saveLastPath" type="hidden" value="<%= false %>" />
@@ -42,14 +46,13 @@
 				<aui:validator name="required" />
 			</aui:input>
 
-			<aui:input name="CAH" showRequiredLabel="<%= false %>" type="text" value="Bogdan" >
-				<aui:validator name="required" />
-			</aui:input>
+			<aui:input name="LoginCode" showRequiredLabel="<%= false %>" type="text" value="" />
 			
 			<aui:button-row>
 				<aui:button cssClass="btn-lg" type="submit" value="sign-in" />
 			</aui:button-row>
 				
 		</aui:form>
+		
 	</c:otherwise>
 </c:choose>

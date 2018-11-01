@@ -163,6 +163,11 @@ public class StocItemDAO {
 			String LUNA_SOSIRE_IN_TARA = resultSet.getString("LUNA_SOSIRE_IN_TARA");
 			String REZERVATA = resultSet.getString("REZERVATA");
 			String DATA_EXPIRARE_REZ = resultSet.getString("DATA_EXPIRARE_REZ");
+			String product_type = resultSet.getString("PRODUCT_TYPE");
+
+			if ("Moto".equalsIgnoreCase(product_type)) {
+				CULOARE_INTERIOR = "";
+			}
 
 			TIP_AUTOVEHICUL = TIP_AUTOVEHICUL == null ? "" : TIP_AUTOVEHICUL;
 			COD_CULOARE_EXTERIOR = COD_CULOARE_EXTERIOR == null ? "" : COD_CULOARE_EXTERIOR;

@@ -1,5 +1,2 @@
-Bundle-Name: MyCustomLoginPortlet
 Bundle-SymbolicName: mycustomloginportlet
 Bundle-Version: 1.0.0
-Bundle-Description: HTRODealers App remade with Datatables and boostrap styles.
-Bundle-Category: Applications

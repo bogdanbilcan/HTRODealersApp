@@ -1,8 +1,11 @@
 <%@include file="../init.jsp"%>
+
 <link rel="stylesheet" type="text/css"
 	href="https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.18/b-1.5.2/b-flash-1.5.2/b-html5-1.5.2/fh-3.1.4/datatables.min.css" />
+
 <script type="text/javascript"
 	src="https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.18/b-1.5.2/b-flash-1.5.2/b-html5-1.5.2/fh-3.1.4/datatables.min.js"></script>
+
 <style>
 .message-container {
 	padding: 10px;
@@ -16,6 +19,7 @@ div.dt-buttons {
 	float: right;
 }
 </style>
+
 <script type="text/javascript">
 AUI.$ = jQuery.noConflict();
 
@@ -527,6 +531,7 @@ table.columns([1,10,16]).every(function() {
 		</div>
 	</c:if>
 </aui:form>
+
 <c:if test="<%=Validator.isNull(portofoliuItems1) || portofoliuItems1.isEmpty()%>">
 	<div class="message-container"><%=noResults%></div>
 </c:if>

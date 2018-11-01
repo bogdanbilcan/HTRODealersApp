@@ -1,10 +1,10 @@
 #
-#Thu Sep 27 16:58:29 EEST 2018
+#Wed Oct 31 17:18:42 EET 2018
 linkedResources=
 managedNatures=
 classpath=<?xml version\="1.0" encoding\="UTF-8"?>\n<classpath>\n</classpath>\n
-subprojectPaths=HTRODealers;HtroDealersUpdated
-derivedResources=.gradle;build;HTRODealers/build;HtroDealersUpdated/build
+subprojectPaths=CustomLoginHook;HTRODealers;HtroDealersUpdated;MyCustomLoginPortlet
+derivedResources=.gradle;build;CustomLoginHook/build;HTRODealers/build;HtroDealersUpdated/build;MyCustomLoginPortlet/build
 buildScriptPath=build.gradle
 managedBuilders=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><commands/>
 buildDir=build

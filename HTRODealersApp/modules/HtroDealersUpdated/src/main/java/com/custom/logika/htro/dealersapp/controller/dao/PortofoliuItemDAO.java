@@ -83,6 +83,11 @@ public class PortofoliuItemDAO {
 			int SOLD_CUST_ID = resultSet.getInt("SOLD_CUST_ID");
 			boolean PROFORMA = resultSet.getString("PROFORMA_REQ").equalsIgnoreCase("Y") ? true : false;
 			boolean TRANSPORT = resultSet.getString("TRANSPORT_REQ").equalsIgnoreCase("Y") ? true : false;
+			String product_type = resultSet.getString("PRODUCT_TYPE");
+
+			if ("Moto".equalsIgnoreCase(product_type)) {
+				CULOARE_INTERIOR = "";
+			}
 
 			DEALER = DEALER == null ? "" : DEALER;
 			DATA_REZ_SAU_FACTURA = DATA_REZ_SAU_FACTURA == null ? "" : DATA_REZ_SAU_FACTURA;

@@ -4,55 +4,165 @@
 	<b><liferay-ui:message key="myloginportlet_MyLogin.caption" /></b>
 </p>
 
+<%
+	boolean codeVerified = false;
+	System.out.println("view - themeDisplay.isSignedIn() = " + themeDisplay.isSignedIn());
+%>
 <c:choose>
-	<c:when test="<%= themeDisplay.isSignedIn() %>">
+	<c:when test="<%=themeDisplay.isSignedIn() && codeVerified%>">
 
 		<%
-		String signedInAs = HtmlUtil.escape(user.getFullName());
+			String signedInAs = HtmlUtil.escape(user.getFullName());
 
-		if (themeDisplay.isShowMyAccountIcon() && (themeDisplay.getURLMyAccount() != null)) {
-			String myAccountURL = String.valueOf(themeDisplay.getURLMyAccount());
+					if (themeDisplay.isShowMyAccountIcon() && (themeDisplay.getURLMyAccount() != null)) {
+						String myAccountURL = String.valueOf(themeDisplay.getURLMyAccount());
 
-			signedInAs = "<a class=\"signed-in\" href=\"" + HtmlUtil.escape(myAccountURL) + "\">" + signedInAs + "</a>";
-		}
+						signedInAs = "<a class=\"signed-in\" href=\"" + HtmlUtil.escape(myAccountURL) + "\">"
+								+ signedInAs + "</a>";
+					}
 		%>
 
-		<liferay-ui:message arguments="<%= signedInAs %>" key="you-are-signed-in-as-x" translateArguments="<%= false %>" />
+		<liferay-ui:message arguments="<%=signedInAs%>" key="you-are-signed-in-as-x" translateArguments="<%=false%>" />
 	</c:when>
 	<c:otherwise>
 
 		<%
-		String redirect = ParamUtil.getString(request, "redirect");
+			String formName = "loginForm";
+
+					if (windowState.equals(LiferayWindowState.EXCLUSIVE)) {
+						formName += "Modal";
+					}
+
+					String redirect = ParamUtil.getString(request, "redirect");
+					System.out.println("loginForm - redirect = " + redirect);
+					String login = (String) SessionErrors.get(renderRequest, "login");
+					System.out.println("loginForm - login = " + login);
+
+					String password = StringPool.BLANK;
+					boolean rememberMe = ParamUtil.getBoolean(request, "rememberMe");
 		%>
 
-		<portlet:actionURL name="/login/login" var="loginURL">
-			<portlet:param name="mvcRenderCommandName" value="/login/login" />
-		</portlet:actionURL>
+		<div class="login-container">
+			<portlet:actionURL name="/login/login" secure="<%=PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS || request.isSecure()%>"
+				var="loginURL">
+				<portlet:param name="mvcRenderCommandName" value="/login/login" />
+			</portlet:actionURL>
 
-		<portlet:actionURL name="/login/login1" var="login1URL">
-			<portlet:param name="mvcRenderCommandName" value="/login/login1" />
-		</portlet:actionURL>
+			<aui:form action="<%=loginURL%>" autocomplete='<%=PropsValues.COMPANY_SECURITY_LOGIN_FORM_AUTOCOMPLETE ? "on" : "off"%>'
+				cssClass="sign-in-form" method="post" name="<%=formName%>" onSubmit="event.preventDefault();">
+				<aui:input name="saveLastPath" type="hidden" value="<%=false%>" />
+				<aui:input name="redirect" type="hidden" value="<%=redirect%>" />
+				<aui:input name="doActionAfterLogin" type="hidden" value="<%=portletName.equals(PortletKeys.FAST_LOGIN) ? true : false%>" />
 
-		<aui:form action="<%= loginURL %>" autocomplete='on' cssClass="sign-in-form" method="post" name="loginForm">
+				<div class="inline-alert-container lfr-alert-container"></div>
 
-			<aui:input name="saveLastPath" type="hidden" value="<%= false %>" />
-			<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
+				<liferay-util:dynamic-include key="com.liferay.login.web#/login.jsp#alertPre" />
 
-			<aui:input autoFocus="true" cssClass="clearable" label="email-address" name="login" showRequiredLabel="<%= false %>" type="text" value="">
-				<aui:validator name="required" />
-			</aui:input>
+				<c:choose>
+					<c:when test='<%=SessionMessages.contains(request, "passwordSent")%>'>
+						<div class="alert alert-success">
+							<liferay-ui:message key="your-password-was-sent-to-the-provided-email-address" />
+						</div>
+					</c:when>
 
-			<aui:input name="password" showRequiredLabel="<%= false %>" type="password">
-				<aui:validator name="required" />
-			</aui:input>
+					<c:when test='<%=SessionMessages.contains(request, "userPending")%>'>
 
-			<aui:input name="LoginCode" showRequiredLabel="<%= false %>" type="text" value="" />
+						<%
+							String userEmailAddress = (String) SessionMessages.get(request, "userPending");
+						%>
 
-			<aui:button-row>
-				<aui:button cssClass="btn-lg" type="submit" value="sign-in" />
-			</aui:button-row>
+						<div class="alert alert-success">
+							<liferay-ui:message arguments="<%=HtmlUtil.escape(userEmailAddress)%>"
+								key="thank-you-for-creating-an-account.-you-will-be-notified-via-email-at-x-when-your-account-has-been-approved"
+								translateArguments="<%=false%>" />
+						</div>
+					</c:when>
+				</c:choose>
 
-		</aui:form>
+				<liferay-ui:error exception="<%=AuthException.class%>" message="authentication-failed" />
+				<liferay-ui:error exception="<%=NoSuchUserException.class%>" message="authentication-failed" />
+				<liferay-ui:error exception="<%=PasswordExpiredException.class%>" message="your-password-has-expired" />
+				<liferay-ui:error exception="<%=UserEmailAddressException.MustNotBeNull.class%>" message="please-enter-an-email-address" />
+				<liferay-ui:error exception="<%=UserLockoutException.LDAPLockout.class%>" message="this-account-is-locked" />
+				<liferay-ui:error exception="<%=UserLockoutException.PasswordPolicyLockout.class%>">
 
-	</c:otherwise>
+					<%
+						UserLockoutException.PasswordPolicyLockout ule = (UserLockoutException.PasswordPolicyLockout) errorException;
+					%>
+
+					<liferay-ui:message arguments="<%=ule.user.getUnlockDate()%>" key="this-account-is-locked-until-x" translateArguments="<%=false%>" />
+				</liferay-ui:error>
+
+				<liferay-ui:error exception="<%=UserPasswordException.class%>" message="authentication-failed" />
+				<liferay-ui:error exception="<%=UserScreenNameException.MustNotBeNull.class%>" message="the-screen-name-cannot-be-blank" />
+
+				<liferay-util:dynamic-include key="com.liferay.login.web#/login.jsp#alertPost" />
+
+				<aui:fieldset>
+
+					<%
+						String loginLabel = null;
+
+										if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
+											loginLabel = "email-address";
+										} else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
+											loginLabel = "screen-name";
+										} else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
+											loginLabel = "id";
+										}
+					%>
+
+					<aui:input cssClass="clearable" label="<%=loginLabel%>" name="login" showRequiredLabel="<%=false%>" type="text" value="<%=login%>">
+						<aui:validator name="required" />
+					</aui:input>
+
+					<aui:input name="password" showRequiredLabel="<%=false%>" type="password" value="<%=password%>">
+						<aui:validator name="required" />
+					</aui:input>
+
+					<span id="<portlet:namespace />passwordCapsLockSpan" style="display: none;"><liferay-ui:message key="caps-lock-is-on" /></span>
+
+					<c:if test="<%=company.isAutoLogin() && !PropsValues.SESSION_DISABLED%>">
+						<aui:input checked="<%=rememberMe%>" name="rememberMe" type="checkbox" />
+					</c:if>
+				</aui:fieldset>
+
+				<aui:button-row>
+					<aui:button cssClass="btn-lg" type="submit" value="sign-in" />
+				</aui:button-row>
+			</aui:form>
+
+		</div>
+
+		<aui:script sandbox="<%=true%>">
+			var form = AUI.$(document.<portlet:namespace /><%= formName %>);
+
+			form.on(
+				'submit',
+				function(event) {
+					<c:if test="<%= Validator.isNotNull(redirect) %>">
+						var redirect = form.fm('redirect');
+
+						if (redirect) {
+							var redirectVal = redirect.val();
+
+							redirect.val(redirectVal + window.location.hash);
+						}
+					</c:if>
+
+					submitForm(form);
+				}
+			);
+
+			form.fm('password').on(
+				'keypress',
+				function(event) {
+					Liferay.Util.showCapsLock(event, '<portlet:namespace />passwordCapsLockSpan');
+				}
+			);
+		</aui:script>
+			
+
+	
+		</c:otherwise>
 </c:choose>

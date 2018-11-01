@@ -1,0 +1,10 @@
+#
+#Fri Oct 05 12:01:37 EEST 2018
+linkedResources=
+managedNatures=org.eclipse.jdt.core.javanature;com.liferay.ide.core.liferayNature
+classpath=<?xml version\="1.0" encoding\="UTF-8"?>\n<classpath>\n</classpath>\n
+subprojectPaths=
+derivedResources=.gradle;build
+buildScriptPath=build.gradle
+managedBuilders=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><commands/>
+buildDir=build

@@ -1,9 +1,12 @@
 
 package com.custom.logika.htro.dealersapp.portlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.sql.Date;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +41,8 @@ import com.liferay.portal.kernel.service.UserGroupServiceUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.upload.UploadPortletRequest;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -64,7 +69,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 
 	public void updateUserGroups(ActionRequest request, ActionResponse response) {
 
-		hndApp_log.info("updateUserGroups - Start updating custom fields");
+		hndApp_log.debug("updateUserGroups - Start updating custom fields");
 		String tipAutovehicule = "TipAutovehicule";
 
 		String automobile = "Automobile";
@@ -75,17 +80,17 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 		String[] tipMoto = request.getParameterValues("tipMoto");
 		String[] tipToate = request.getParameterValues("tipToate");
 
-		// hndApp_log.info("updateUserGroups - tipAuto[] = " + tipAuto);
-		// hndApp_log.info("updateUserGroups - tipMoto[] = " + tipMoto);
-		// hndApp_log.info("updateUserGroups - tipToate[] = " + tipToate);
+		// hndApp_log.debug("updateUserGroups - tipAuto[] = " + tipAuto);
+		// hndApp_log.debug("updateUserGroups - tipMoto[] = " + tipMoto);
+		// hndApp_log.debug("updateUserGroups - tipToate[] = " + tipToate);
 
 		boolean statusAuto = tipAuto != null && !tipAuto[0].equalsIgnoreCase("false");
 		boolean statusMoto = tipMoto != null && !tipMoto[0].equalsIgnoreCase("false");
 		boolean statusToate = tipToate != null && !tipToate[0].equalsIgnoreCase("false");
 
-		hndApp_log.info("updateUserGroups - statusAuto = " + statusAuto);
-		hndApp_log.info("updateUserGroups - statusMoto = " + statusMoto);
-		hndApp_log.info("updateUserGroups - statusToate = " + statusToate);
+		hndApp_log.debug("updateUserGroups - statusAuto = " + statusAuto);
+		hndApp_log.debug("updateUserGroups - statusMoto = " + statusMoto);
+		hndApp_log.debug("updateUserGroups - statusToate = " + statusToate);
 
 		if (statusAuto) {
 
@@ -98,7 +103,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 							automobile
 						});
 
-					hndApp_log.info("updateUserGroups - setAttribute automobile to " + name);
+					hndApp_log.debug("updateUserGroups - setAttribute automobile to " + name);
 				}
 				catch (PortalException e1) {
 					hndApp_log.error("createUserGroups - Erroare la citiree UserGroups custom fields", e1);
@@ -119,7 +124,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 						{
 							motociclete
 						});
-					hndApp_log.info("updateUserGroups - setAttribute motociclete to " + name);
+					hndApp_log.debug("updateUserGroups - setAttribute motociclete to " + name);
 				}
 				catch (PortalException e1) {
 					hndApp_log.error("createUserGroups - Erroare la citiree UserGroups custom fields", e1);
@@ -140,7 +145,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 						{
 							toate
 						});
-					hndApp_log.info("updateUserGroups - setAttribute toate to " + name);
+					hndApp_log.debug("updateUserGroups - setAttribute toate to " + name);
 				}
 				catch (PortalException e1) {
 					hndApp_log.error("createUserGroups - Erroare la citiree UserGroups custom fields", e1);
@@ -152,12 +157,12 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			}
 		}
 
-		hndApp_log.info("updateUserGroups - Finish updating custom field on grups");
+		hndApp_log.debug("updateUserGroups - Finish updating custom field on grups");
 	}
 
 	public void createUserGroups(ActionRequest request, ActionResponse response) {
 
-		hndApp_log.info("createUserGroups - StartCreating");
+		hndApp_log.debug("createUserGroups - StartCreating");
 		String description = "";
 		String tipAutovehicule = "TipAutovehicule";
 		Map<String, String> dealers = DBConnection.getInstance().getDealers();
@@ -166,7 +171,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			// dealer name is key
 			// dealer id is value - also is description for group
 			description = dealers.get(name);
-			hndApp_log.info("createUserGroups - name = " + name);
+			hndApp_log.debug("createUserGroups - name = " + name);
 			try {
 				@SuppressWarnings("deprecation")
 				UserGroup newGr = UserGroupServiceUtil.addUserGroup(name, description);
@@ -189,7 +194,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 				String[] TipAutovehicule = (String[]) usrGr.getExpandoBridge().getAttribute(tipAutovehicule);
 				String tipAutoveh = String.join("", TipAutovehicule);
 				description = usrGr.getDescription();
-				hndApp_log.info(
+				hndApp_log.debug(
 					"createUserGroups - read usergroup = " + name + " - tipAutoveh = " + tipAutoveh + " - descr = " + description);
 			}
 			catch (PortalException e1) {
@@ -201,16 +206,16 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			}
 		}
 
-		hndApp_log.info("createUserGroups - Finish Creating Roles");
+		hndApp_log.debug("createUserGroups - Finish Creating Roles");
 	}
 
 	public void setEmails(ActionRequest request, ActionResponse response) {
 
-		hndApp_log.info("setEmails - Start Updating the emails");
+		hndApp_log.debug("setEmails - Start Updating the emails");
 		String emailAddresses = ParamUtil.getString(request, "emailAddresses");
 		String EmailAddresses = "EmailAddresses";
 		Group test = null;
-		hndApp_log.info("setEmails - emailAddresses = " + emailAddresses);
+		hndApp_log.debug("setEmails - emailAddresses = " + emailAddresses);
 
 		ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
 
@@ -225,7 +230,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			response.setRenderParameter("mvcPath", "/htro_admin/adminActions.jsp");
 			e1.printStackTrace();
 		}
-		hndApp_log.info("setEmails - Finished updating the emails");
+		hndApp_log.debug("setEmails - Finished updating the emails");
 	}
 
 	@Override
@@ -236,36 +241,27 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			String tipAuto = ParamUtil.getString(renderRequest, "tipAuto");
 			String culoareExterior = ParamUtil.getString(renderRequest, "culoareExterior");
 			String dealerIdValue = ParamUtil.getString(renderRequest, "dealerIdValue");
+			hndApp_log.debug("Render - DealerMultiplu dealerId - " + dealerIdValue);
+
 			int dealerId = 0;
 			dealerIdValue = dealerIdValue == null ? "0" : dealerIdValue;
+			dealerIdValue = dealerIdValue == "" ? "0" : dealerIdValue;
 
-			if (tipAuto != null && tipAuto.length() > 0) {
+			tipAuto = tipAuto == null ? "" : tipAuto;
 
-				tipAuto = tipAuto.equalsIgnoreCase("SelectAll") ? "" : tipAuto;
-				culoareExterior = culoareExterior.equalsIgnoreCase("SelectAll") ? "" : culoareExterior;
+			//if (tipAuto != null && tipAuto.length() > 0) {
+			//tipAuto = tipAuto.equalsIgnoreCase("SelectAll") ? "" : tipAuto;
+			culoareExterior = culoareExterior.equalsIgnoreCase("SelectAll") ? "" : culoareExterior;
 
-				if (dealerIdValue.contains(",")) {
-					String[] dealersList = dealerIdValue.split(",");
-					for (int i = 0; i < dealersList.length; i++) {
-						dealerId = Integer.parseInt(dealersList[i]);
-						try {
-							DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
-							hndApp_log.info(
-								"Render - DealerMultiplu dealerId - " + dealerId + " - S-a cautat tipAuto = " + tipAuto +
-									" si culoareExterior = " + culoareExterior);
-						}
-						catch (Exception e) {
-							hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc)- ", e);
-							e.printStackTrace();
-							throw new PortletException(e);
-						}
-					}
-				}
-				else {
-					dealerId = Integer.parseInt(dealerIdValue);
+			if (dealerIdValue.contains(",")) {
+				String[] dealersList = dealerIdValue.split(",");
+				for (int i = 0; i < dealersList.length; i++) {
+					dealerId = Integer.parseInt(dealersList[i]);
 					try {
 						DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
-						hndApp_log.info("Render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
+						hndApp_log.debug(
+							"Render - DealerMultiplu dealerId - " + dealerId + " - S-a cautat tipAuto = " + tipAuto +
+								" si culoareExterior = " + culoareExterior);
 					}
 					catch (Exception e) {
 						hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc)- ", e);
@@ -273,8 +269,21 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 						throw new PortletException(e);
 					}
 				}
-
 			}
+			else {
+				dealerId = Integer.parseInt(dealerIdValue);
+				try {
+					DBConnection.getInstance().RegisterCarSearch(dealerId, tipAuto, culoareExterior);
+					hndApp_log.debug("Render - S-a cautat tipAuto = " + tipAuto + " si culoareExterior = " + culoareExterior);
+				}
+				catch (Exception e) {
+					hndApp_log.error("Exceptie generata la inregistrarea tipului cautat in render (stoc) - ", e);
+					e.printStackTrace();
+					throw new PortletException(e);
+				}
+			}
+
+			//}
 		}
 		catch (Exception e) {
 			hndApp_log.error("Exceptie generata la randare - ", e);
@@ -289,22 +298,28 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 
 		try {
 
-			List<List<String>> reportTableData = new ArrayList<>();
+			List<List<Object>> reportTableData = new ArrayList<>();
 			List<String> reportHeaders = new ArrayList<>();
 
 			reportTableData = DBConnection.getInstance().ListTableItems("hnd_car_stock_info_rep1_v");
 			reportHeaders = DBConnection.getInstance().GetColumnHeaders("hnd_car_stock_info_rep1_v");
 
-			OutputStream os;
-			XSSFWorkbook workbook = ExportDataUtil.exportExcel1AndPivot(reportTableData, reportHeaders);
-			resourceResponse.setContentType("application/x-excel");
-			resourceResponse.setProperty("Content-Disposition", "attachment; filename=HTRO_Custom_Report.xlsx");
-			os = resourceResponse.getPortletOutputStream();
-			workbook.write(os);
-
-			os.close();
-
-			hndApp_log.info("ExportRaport1 - Excel file written successfully...");
+			if (reportTableData.size() <= 0) {
+				throw new PortletException(
+					"HTRO Custom Report1 - nu s-au gasit date in tabelul: hnd_car_stock_info_rep1_v");
+			}
+			else {
+				OutputStream os;
+				XSSFWorkbook workbook = ExportDataUtil.exportExcel1AndPivot(reportTableData, reportHeaders);
+				resourceResponse.setContentType("application/x-excel");
+				resourceResponse.setProperty("Content-Disposition", "attachment; filename=HTRO_Custom_Report.xlsx");
+				os = resourceResponse.getPortletOutputStream();
+				workbook.write(os);
+				os.flush();
+				os.close();
+				//super.serveResource(resourceRequest, resourceResponse);
+				hndApp_log.debug("ExportRaport1 - Excel file written successfully...");
+			}
 		}
 		catch (Exception e) {
 			hndApp_log.error("ExportRaport1 - Exceptie generata de constructia raportului HTRO Custom Report1", e);
@@ -317,8 +332,8 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 	public void _executeExportRaport2(ResourceRequest resourceRequest, ResourceResponse resourceResponse) {
 
 		try {
-			List<List<String>> reportTableData1 = new ArrayList<>();
-			List<List<String>> reportTableData2 = new ArrayList<>();
+			List<List<Object>> reportTableData1 = new ArrayList<>();
+			List<List<Object>> reportTableData2 = new ArrayList<>();
 			List<String> reportHeaders1 = new ArrayList<>();
 			List<String> reportHeaders2 = new ArrayList<>();
 
@@ -328,17 +343,28 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			reportHeaders1 = DBConnection.getInstance().GetColumnHeaders("HND_SEARCH_AND_RES__BGD_V");
 			reportHeaders2 = DBConnection.getInstance().GetColumnHeaders("HND_SEARCH_AND_RES__BGD2_V");
 
-			XSSFWorkbook workbook = ExportDataUtil.createPivotSearchedAndReserved(reportTableData1, reportHeaders1);
-
-			workbook = ExportDataUtil.createSecondPivot(workbook, reportTableData2, reportHeaders2);
-
-			resourceResponse.setContentType("application/x-excel");
-			resourceResponse.setProperty("Content-Disposition", "attachment; filename=RaportRezervariSiInterogari.xlsx");
-			OutputStream os = resourceResponse.getPortletOutputStream();
-			workbook.write(os);
-			os.close();
-
-			hndApp_log.info("RaportRezervariSiInterogari - Excel file written successfully...");
+			if (reportTableData1.size() <= 0 || reportTableData2.size() <= 0) {
+				PrintWriter out = resourceResponse.getWriter();
+				out.print("RaportRezervariSiInterogari nu s-a putut genera - lipsa date!");
+				out.flush();
+				super.serveResource(resourceRequest, resourceResponse);
+				throw new PortletException(
+					"RaportRezervariSiInterogari - nu s-au gasit date in tabelele: HND_SEARCH_AND_RES__BGD_V sau HND_SEARCH_AND_RES__BGD2_V");
+			}
+			else {
+				XSSFWorkbook workbook = ExportDataUtil.createPivotSearchedAndReserved(reportTableData1, reportHeaders1);
+				workbook = ExportDataUtil.createSecondPivot(workbook, reportTableData2, reportHeaders2);
+				resourceResponse.setContentType("application/x-excel");
+				resourceResponse.setProperty("Content-Disposition", "attachment; filename=RaportRezervariSiInterogari.xlsx");
+				OutputStream os = resourceResponse.getPortletOutputStream();
+				workbook.write(os);
+				os.close();
+				PrintWriter out = resourceResponse.getWriter();
+				out.print("RaportRezervariSiInterogari generat cu succes!");
+				out.flush();
+				super.serveResource(resourceRequest, resourceResponse);
+				hndApp_log.debug("RaportRezervariSiInterogari - Excel file written successfully...");
+			}
 		}
 		catch (Exception e) {
 			hndApp_log.error("RaportRezervariSiInterogari - Exceptie generata de constructia raportului!!", e);
@@ -350,13 +376,13 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 	public void VerificaCheckboxes(ActionRequest request, ActionResponse response) {
 
 		String[] cerereTransport = request.getParameterValues("transport");
-		String[] cerereProforma = request.getParameterValues("proforma");
+		//String[] cerereProforma = request.getParameterValues("proforma");
 		List<String> toAddresses = new ArrayList<String>();
 		String adrese = "";
 		String EmailAddresses = "EmailAddresses";
 		Group test = null;
 
-		boolean testProforma = false;
+		//boolean testProforma = false;
 		boolean testTransport = false;
 
 		ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
@@ -387,8 +413,8 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			e1.printStackTrace();
 		}
 
-		if ((cerereTransport == null || cerereTransport[0].equalsIgnoreCase("false")) &&
-			(cerereProforma == null || cerereProforma[0].equalsIgnoreCase("false"))) {
+		//&& (cerereProforma == null || cerereProforma[0].equalsIgnoreCase("false"))
+		if ((cerereTransport == null || cerereTransport[0].equalsIgnoreCase("false"))) {
 			SessionErrors.clear(request);
 			SessionErrors.add(request, "cerereNetransmisa2");
 			PortalUtil.copyRequestParameters(request, response);
@@ -440,10 +466,10 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			try {
 				testTransport = SendMailUtil.sendMailTransport(emailBody1, toAddresses);
 				if (testTransport) {
-					hndApp_log.info("Mail - Cerere Transport transmisa OK");
+					hndApp_log.debug("Mail - Cerere Transport transmisa OK");
 					for (int nr : carNo) {
 						DBConnection.getInstance().RegisterCerereTransport(nr);
-						hndApp_log.info("Cerere Transport transmisa si inregistrata in DB OK");
+						hndApp_log.debug("Cerere Transport transmisa si inregistrata in DB OK");
 					}
 
 					SessionMessages.add(request, "cereretransportTransmisa");
@@ -463,72 +489,91 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			}
 		}
 
-		if (cerereProforma != null && !(cerereProforma[0].equalsIgnoreCase("false"))) {
-
-			System.out.println("VerificaCheckboxes - cerereProforma ===>" + cerereProforma.length);
-			List<Integer> carNo = new ArrayList<Integer>();
-			String firstPart =
-				"<style>.mystyle{border: 1px solid black;border-collapse: collapse;}</style><body style=\"margin: 1;padding: 1;\"><table><tbody><tr><td><div><p>Buna ziua,</p>S-a generat cererea pentru eliberare Proforma aferenta urmatoarelor automobile:</div><br><div class=\"tg-wrap\"><table class=\"table table-striped table-bordered nowrap mystyle\" ><thead><tr><th class=\"mystyle\">Dealer</th><th class=\"mystyle\">Locatie</th><th class=\"mystyle\">Cod Model</th><th class=\"mystyle\">Tip Auto</th><th class=\"mystyle\">Cod Culoare Ext.</th><th class=\"mystyle\">VIN No.</th><th class=\"mystyle\">Engine No.</th><th class=\"mystyle\">Nume Client</th><th class=\"mystyle\">Nume Vanzator</th></tr></thead><tbody>";
-			String dataStart = "<tr>";
-			String dataStyleStart = "<td class=\"mystyle\"> ";
-			String dataStyleEnd = " </td>";
-			String dataEnd = " </td></tr>";
-			String endPart =
-				"</tbody></table></div></td></tr><tr><td><div><br><p>Multumesc,</p>HTRO Dealers Application</div></td></tr></tbody></table></body></html>";
-
-			String emailBody = firstPart;
-			for (int i = 0; i < cerereProforma.length; i++) {
-				int carNoTemp = Integer.parseInt(cerereProforma[i].split(",")[0].split("=")[1]);
-				carNo.add(carNoTemp);
-				String dealer = cerereProforma[i].split("DEALER=")[1].split(",")[0];
-				String locatie = cerereProforma[i].split("LOCATIE=")[1].split(",")[0];
-				String cod_model = cerereProforma[i].split("COD_MODEL=")[1].split(",")[0];
-				String tip_auto = cerereProforma[i].split("TIP_AUTOVEHICUL=")[1].split(",")[0];
-				String cod_culoare = cerereProforma[i].split("COD_CULOARE_EXT=")[1].split(",")[0];
-				String vin = cerereProforma[i].split("VIN=")[1].split(",")[0];
-				String engine_no = cerereProforma[i].split("ENGINE_NO=")[1].split(",")[0];
-				String nume_client = cerereProforma[i].split("NUME_CLIENT=")[1].split(",")[0];
-				String nume_vanzator = cerereProforma[i].split("NUME_VANZATOR=")[1].split(",")[0];
-
-				String data = dataStart + dataStyleStart + dealer + dataStyleEnd + dataStyleStart + locatie + dataStyleEnd +
-					dataStyleStart + cod_model + dataStyleEnd + dataStyleStart + tip_auto + dataStyleEnd + dataStyleStart + cod_culoare +
-					dataStyleEnd + dataStyleStart + vin + dataStyleEnd + dataStyleStart + engine_no + dataStyleEnd + dataStyleStart +
-					nume_client + dataStyleEnd + dataStyleStart + nume_vanzator + dataEnd;
-
-				emailBody += data;
-
-				System.out.println(
-					"VerificaCheckboxes - cerereProforma - carNo = " + carNo + " dealer = " + dealer + " locatie = " + locatie +
-						" cod_model = " + cod_model + " tip_auto = " + tip_auto + " cod_culoare = " + cod_culoare + " vin = " + vin +
-						" engine_no = " + engine_no + " nume_client = " + nume_client + " nume_vanzator = " + nume_vanzator);
-			}
-
-			emailBody += endPart;
-
-			try {
-				testProforma = SendMailUtil.sendMailProforma(emailBody, toAddresses);
-				if (testProforma) {
-					hndApp_log.info("Mail - Cerere Proforma transmisa OK");
-					for (int nr : carNo) {
-						DBConnection.getInstance().RegisterCerereProforma(nr);
-						hndApp_log.info("Cerere Proforma transmisa si inregistrata in DB OK");
-					}
-					SessionMessages.add(request, "cerereproformaTransmisa");
-					response.sendRedirect("/htro_portofoliu/viewPortofoliu.jsp");
-				}
-				else {
-					hndApp_log.error("Exceptie generata la trimiterea mail-ului cu Cerere Proforma");
-				}
-			}
-			catch (Exception e) {
-				hndApp_log.error("Exceptie generata la trimiterea unei cereri de Proforma ", e);
-				e.printStackTrace();
-				SessionErrors.add(request, "cerereproformaNetransmisa");
-				SessionErrors.add(request, e.getClass().getName());
-				PortalUtil.copyRequestParameters(request, response);
-				response.setRenderParameter("jspPage", "/htro_portofoliu/viewPortofoliu.jsp");
-			}
-		}
+		/*
+		 * if (cerereProforma != null &&
+		 * !(cerereProforma[0].equalsIgnoreCase("false"))) {
+		 * System.out.println("VerificaCheckboxes - cerereProforma ===>" +
+		 * cerereProforma.length);
+		 * List<Integer> carNo = new ArrayList<Integer>();
+		 * String firstPart =
+		 * "<style>.mystyle{border: 1px solid black;border-collapse: collapse;}</style><body style=\"margin: 1;padding: 1;\"><table><tbody><tr><td><div><p>Buna ziua,</p>S-a generat cererea pentru eliberare Proforma aferenta urmatoarelor automobile:</div><br><div class=\"tg-wrap\"><table class=\"table table-striped table-bordered nowrap mystyle\" ><thead><tr><th class=\"mystyle\">Dealer</th><th class=\"mystyle\">Locatie</th><th class=\"mystyle\">Cod Model</th><th class=\"mystyle\">Tip Auto</th><th class=\"mystyle\">Cod Culoare Ext.</th><th class=\"mystyle\">VIN No.</th><th class=\"mystyle\">Engine No.</th><th class=\"mystyle\">Nume Client</th><th class=\"mystyle\">Nume Vanzator</th></tr></thead><tbody>"
+		 * ;
+		 * String dataStart = "<tr>";
+		 * String dataStyleStart = "<td class=\"mystyle\"> ";
+		 * String dataStyleEnd = " </td>";
+		 * String dataEnd = " </td></tr>";
+		 * String endPart =
+		 * "</tbody></table></div></td></tr><tr><td><div><br><p>Multumesc,</p>HTRO Dealers Application</div></td></tr></tbody></table></body></html>"
+		 * ;
+		 * String emailBody = firstPart;
+		 * for (int i = 0; i < cerereProforma.length; i++) {
+		 * int carNoTemp =
+		 * Integer.parseInt(cerereProforma[i].split(",")[0].split("=")[1]);
+		 * carNo.add(carNoTemp);
+		 * String dealer = cerereProforma[i].split("DEALER=")[1].split(",")[0];
+		 * String locatie =
+		 * cerereProforma[i].split("LOCATIE=")[1].split(",")[0];
+		 * String cod_model =
+		 * cerereProforma[i].split("COD_MODEL=")[1].split(",")[0];
+		 * String tip_auto =
+		 * cerereProforma[i].split("TIP_AUTOVEHICUL=")[1].split(",")[0];
+		 * String cod_culoare =
+		 * cerereProforma[i].split("COD_CULOARE_EXT=")[1].split(",")[0];
+		 * String vin = cerereProforma[i].split("VIN=")[1].split(",")[0];
+		 * String engine_no =
+		 * cerereProforma[i].split("ENGINE_NO=")[1].split(",")[0];
+		 * String nume_client =
+		 * cerereProforma[i].split("NUME_CLIENT=")[1].split(",")[0];
+		 * String nume_vanzator =
+		 * cerereProforma[i].split("NUME_VANZATOR=")[1].split(",")[0];
+		 * String data = dataStart + dataStyleStart + dealer + dataStyleEnd +
+		 * dataStyleStart + locatie + dataStyleEnd +
+		 * dataStyleStart + cod_model + dataStyleEnd + dataStyleStart + tip_auto
+		 * + dataStyleEnd + dataStyleStart + cod_culoare +
+		 * dataStyleEnd + dataStyleStart + vin + dataStyleEnd + dataStyleStart +
+		 * engine_no + dataStyleEnd + dataStyleStart +
+		 * nume_client + dataStyleEnd + dataStyleStart + nume_vanzator +
+		 * dataEnd;
+		 * emailBody += data;
+		 * System.out.println(
+		 * "VerificaCheckboxes - cerereProforma - carNo = " + carNo +
+		 * " dealer = " + dealer + " locatie = " + locatie +
+		 * " cod_model = " + cod_model + " tip_auto = " + tip_auto +
+		 * " cod_culoare = " + cod_culoare + " vin = " + vin +
+		 * " engine_no = " + engine_no + " nume_client = " + nume_client +
+		 * " nume_vanzator = " + nume_vanzator);
+		 * }
+		 * emailBody += endPart;
+		 * try {
+		 * testProforma = SendMailUtil.sendMailProforma(emailBody, toAddresses);
+		 * if (testProforma) {
+		 * hndApp_log.debug("Mail - Cerere Proforma transmisa OK");
+		 * for (int nr : carNo) {
+		 * DBConnection.getInstance().RegisterCerereProforma(nr);
+		 * hndApp_log.debug("Cerere Proforma transmisa si inregistrata in DB OK"
+		 * );
+		 * }
+		 * SessionMessages.add(request, "cerereproformaTransmisa");
+		 * response.sendRedirect("/htro_portofoliu/viewPortofoliu.jsp");
+		 * }
+		 * else {
+		 * hndApp_log.
+		 * error("Exceptie generata la trimiterea mail-ului cu Cerere Proforma"
+		 * );
+		 * }
+		 * }
+		 * catch (Exception e) {
+		 * hndApp_log.
+		 * error("Exceptie generata la trimiterea unei cereri de Proforma ", e);
+		 * e.printStackTrace();
+		 * SessionErrors.add(request, "cerereproformaNetransmisa");
+		 * SessionErrors.add(request, e.getClass().getName());
+		 * PortalUtil.copyRequestParameters(request, response);
+		 * response.setRenderParameter("jspPage",
+		 * "/htro_portofoliu/viewPortofoliu.jsp");
+		 * }
+		 * }
+		 */
 	}
 
 	public void RezervaAction(ActionRequest request, ActionResponse response) {
@@ -549,7 +594,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			tipRezervare = "NOT FIRM";
 		}
 
-		hndApp_log.info(
+		hndApp_log.debug(
 			"RezervaAction - dealerID ===>" + dealerID + " - userEmail ===>" + userEmail + "- tipRezervare ===>" + tipRezervare +
 				"- numeClient ===>" + numeClient + "- numeVanzator ===>" + numeVanzator + "- carNO ===>" + carNo);
 
@@ -558,7 +603,7 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 				String messageOut =
 					DBConnection.getInstance().MakeRezervation(carNo, dealerID, tipRezervare, numeClient, numeVanzator, userEmail);
 
-				hndApp_log.info("RezervaAction - messageOut = " + messageOut);
+				hndApp_log.debug("RezervaAction - messageOut = " + messageOut);
 
 				if (messageOut != null) {
 					if (messageOut.contains("ORA-20001:")) {
@@ -566,12 +611,12 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 						SessionErrors.add(request, "rezervareNeadaugata");
 					}
 					else {
-						hndApp_log.info("Mesaj de eroare diferit- Rezervare ???");
+						hndApp_log.debug("Mesaj de eroare diferit- Rezervare ???");
 						SessionMessages.add(request, "rezervareAdaugata");
 					}
 				}
 				else {
-					hndApp_log.info("Mesaj de eroare gol - Rezervare OK");
+					hndApp_log.debug("Mesaj de eroare gol - Rezervare OK");
 					SessionMessages.add(request, "rezervareAdaugata");
 				}
 			}
@@ -591,12 +636,12 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			int carNo = ParamUtil.getInteger(request, "carNo");
 			String userEmail = ParamUtil.getString(request, "userEmail");
 
-			hndApp_log.info("AnulareRezervareAction - userEmail ===>" + userEmail + "- carNO ===>" + carNo);
+			hndApp_log.debug("AnulareRezervareAction - userEmail ===>" + userEmail + "- carNO ===>" + carNo);
 
 			if (carNo > 0) {
 				String messageOut = DBConnection.getInstance().CancelRezervation(carNo, userEmail);
 
-				hndApp_log.info("AnulareRezervareAction - messageOut = " + messageOut);
+				hndApp_log.debug("AnulareRezervareAction - messageOut = " + messageOut);
 
 				if (messageOut == null) {
 					SessionMessages.add(request, "rezervareAnulata");
@@ -629,13 +674,13 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 		int carNo = ParamUtil.getInteger(request, "carNo");
 		String userEmail = ParamUtil.getString(request, "userEmail");
 
-		hndApp_log.info("SetareRezervareFermaAction - userEmail ===>" + userEmail + "- carNO ===>" + carNo);
+		hndApp_log.debug("SetareRezervareFermaAction - userEmail ===>" + userEmail + "- carNO ===>" + carNo);
 
 		try {
 			if (carNo > 0) {
 				String messageOut = DBConnection.getInstance().SetFirmRezervation(carNo, userEmail);
 
-				hndApp_log.info("SetareRezervareFermaAction - messageOut = " + messageOut);
+				hndApp_log.debug("SetareRezervareFermaAction - messageOut = " + messageOut);
 
 				if (messageOut == null) {
 					SessionMessages.add(request, "rezervareActualizata");
@@ -670,14 +715,14 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 		int carNo = ParamUtil.getInteger(request, "carNo");
 		String userEmail = ParamUtil.getString(request, "userEmail");
 
-		hndApp_log.info(
+		hndApp_log.debug(
 			"UpdateNumeClientAction - userEmail ===>" + userEmail + " - carNO ===>" + carNo + " numeClient ===>" + numeClient +
 				" numeVanzator ===> " + numeVanzator);
 		try {
 			if (carNo > 0) {
 				String messageOut = DBConnection.getInstance().UpdateCustomerName(carNo, numeClient, numeVanzator, userEmail);
 
-				hndApp_log.info("UpdateNumeClientAction - messageOut = " + messageOut);
+				hndApp_log.debug("UpdateNumeClientAction - messageOut = " + messageOut);
 
 				if (messageOut == null) {
 					SessionMessages.add(request, "detaliirezervareActualizate");
@@ -703,6 +748,290 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			SessionErrors.add(request, e.getClass().getName());
 			PortalUtil.copyRequestParameters(request, response);
 			response.setRenderParameter("mvcPath", "/htro_actions/updateNume.jsp");
+		}
+	}
+
+	public void GenerateWarranty(ActionRequest request, ActionResponse response) {
+
+		List<Object> params = new ArrayList<Object>();
+		List<List<Object>> files = new ArrayList<List<Object>>();
+		List<Object> params2 = new ArrayList<Object>();
+		List<Object> params3 = new ArrayList<Object>();
+		List<Object> params4 = new ArrayList<Object>();
+		List<Object> params5 = new ArrayList<Object>();
+		List<Object> params6 = new ArrayList<Object>();
+
+		byte[] blob1 = null;
+		byte[] blob2 = null;
+		byte[] blob3 = null;
+		byte[] blob4 = null;
+		byte[] blob5 = null;
+
+		DateFormat dateFormat = DateFormat.getDateInstance();
+
+		String numeClient = ParamUtil.getString(request, "numeClient");
+		String numeVanzator = ParamUtil.getString(request, "numeVanzator");
+
+		String userEmail = ParamUtil.getString(request, "userEmail");
+
+		// reading 31 parameters
+		/*
+		 * 1 p_HTRO_CAR_NO => :P14_HTRO_CAR_NO,
+		 * 2 p_WARRANTY_START_DATE => :P14_WARRANTY_START,
+		 * 3 p_DEALER_ID => :P14_DEALER_ID,
+		 * 4 p_RETAIL_DATE => :P14_RETAIL_DATE,
+		 * 5 p_END_USER_TYPE => :P14_END_USER_TYPE,
+		 * 6 p_END_USER_TITLE => :P14_END_USER_TITLE,
+		 * 7 p_PAYMENT_TYPE => :P14_PAYMENT_TYPE,
+		 * 8 p_LEASING_COMPANY => :P14_LEASING_COMP,
+		 * 9 p_SCRAPPAGE => :P14_SCRAPPAGE,
+		 * 10 p_END_USER_NAME => :P14_USER_NAME,
+		 * 11 p_FIRST_NAME => :P14_FIRST_NAME,
+		 * 12 p_LAST_NAME => :P14_LAST_NAME,
+		 * 13 p_BIRTH_DATE => :P14_BIRTH_DATE,
+		 * 14 p_GENDER => :P14_GENDER,
+		 * 15 p_COMPANY => :P14_COMPANY,
+		 * 16 p_ADDRESS => '',
+		 * 17 p_ADDR_COUNTY_ABBRV => :P14_JUD_SECT,
+		 * 18 p_ADDR_TOWN_OR_CITY => :P14_ORAS,
+		 * 19 p_addr_street => :P14_STRADA,
+		 * 20 p_addr_no => :P14_NR,
+		 * 21 p_addr_building => :P14_BLOC,
+		 * 22 p_addr_entrance => :P14_SCARA,
+		 * 23 p_addr_floor => :P14_ETAJ,
+		 * 24 p_addr_appartment_no => :P14_APARTMANET,
+		 * 25 p_POSTAL_CODE => :P14_COD_POSTAL,
+		 * 26 p_EMAIL1 => :P14_EMAIL_1,
+		 * 27 p_EMAIL2 => :P14_EMAIL_2,
+		 * 28 p_MOBILE_PHONE1 => :P14_MOBILE_1,
+		 * 29 p_MOBILE_PHONE2 => :P14_MOBILE_2,
+		 * 30 p_MARKETING => :P14_FLEET,
+		 * 31 p_COMMENTS => :P14_COMMENTS);
+		 */
+
+		Integer carNo = ParamUtil.getInteger(request, "carNo");
+		Date p_WARRANTY_START_DATE = new java.sql.Date(ParamUtil.getDate(request, "warrantyStartDate", dateFormat).getTime());
+		Integer dealerID = Integer.valueOf(ParamUtil.getString(request, "dealerID"));
+		Date p_RETAIL_DATE = new java.sql.Date(ParamUtil.getDate(request, "retailDate", dateFormat).getTime());
+		String p_END_USER_TYPE = ParamUtil.getString(request, "end_user_type");
+		String p_END_USER_TITLE = ParamUtil.getString(request, "end_user_title");
+		String p_PAYMENT_TYPE = ParamUtil.getString(request, "paymentType");
+		String p_LEASING_COMPANY = ParamUtil.getString(request, "leasingCompany");
+		String p_SCRAPPAGE = ParamUtil.getString(request, "scrappage");
+		p_SCRAPPAGE = p_SCRAPPAGE == "true" ? "T" : "F";
+		String p_END_USER_NAME = ParamUtil.getString(request, "userName");
+		String p_FIRST_NAME = ParamUtil.getString(request, "firstName");
+		String p_LAST_NAME = ParamUtil.getString(request, "lastName");
+		Date p_BIRTH_DATE = new java.sql.Date(ParamUtil.getDate(request, "birthDate", dateFormat).getTime());
+		String p_GENDER = ParamUtil.getString(request, "gender");
+		String p_COMPANY = ParamUtil.getString(request, "company");
+		String p_ADDR_COUNTY_ABBRV = ParamUtil.getString(request, "judetSector");
+		String p_ADDR_TOWN_OR_CITY = ParamUtil.getString(request, "oras");
+		String p_addr_street = ParamUtil.getString(request, "strada");
+		String p_addr_no = ParamUtil.getString(request, "nr");
+		String p_addr_building = ParamUtil.getString(request, "bloc");
+		String p_addr_entrance = ParamUtil.getString(request, "scara");
+		String p_addr_floor = ParamUtil.getString(request, "etaj");
+		String p_addr_appartment_no = ParamUtil.getString(request, "apartament");
+		String p_POSTAL_CODE = ParamUtil.getString(request, "codPostal");
+		String p_EMAIL1 = ParamUtil.getString(request, "email1");
+		String p_EMAIL2 = ParamUtil.getString(request, "email2");
+		String p_MOBILE_PHONE1 = ParamUtil.getString(request, "mobile1");
+		String p_MOBILE_PHONE2 = ParamUtil.getString(request, "mobile2");
+		String p_FLEET = ParamUtil.getString(request, "fleet");
+		p_FLEET = p_FLEET == "true" ? "T" : "F";
+		String p_COMMENTS = ParamUtil.getString(request, "comments");
+
+		System.out.println("p_WARRANTY_START_DATE= " + p_WARRANTY_START_DATE);
+		System.out.println("p_RETAIL_DATE= " + p_RETAIL_DATE);
+		System.out.println("p_BIRTH_DATE= " + p_BIRTH_DATE);
+		System.out.println("p_GENDER= " + p_GENDER);
+		System.out.println("p_SCRAPPAGE= " + p_SCRAPPAGE);
+		System.out.println("fleet= " + p_FLEET);
+
+		params.add(carNo);
+		params.add(p_WARRANTY_START_DATE);
+		params.add(dealerID);
+		params.add(p_RETAIL_DATE);
+		params.add(p_END_USER_TYPE);
+		params.add(p_END_USER_TITLE);
+		params.add(p_PAYMENT_TYPE);
+		params.add(p_LEASING_COMPANY);
+		params.add(p_SCRAPPAGE);
+		params.add(p_END_USER_NAME);
+		params.add(p_FIRST_NAME);
+		params.add(p_LAST_NAME);
+		params.add(p_BIRTH_DATE);
+		params.add(p_GENDER);
+		params.add(p_COMPANY);
+		params.add(""); // -- for address
+		params.add(p_ADDR_COUNTY_ABBRV);
+		params.add(p_ADDR_TOWN_OR_CITY);
+		params.add(p_addr_street);
+		params.add(p_addr_no);
+		params.add(p_addr_building);
+		params.add(p_addr_entrance);
+		params.add(p_addr_floor);
+		params.add(p_addr_appartment_no);
+		params.add(p_POSTAL_CODE);
+		params.add(p_EMAIL1);
+		params.add(p_EMAIL2);
+		params.add(p_MOBILE_PHONE1);
+		params.add(p_MOBILE_PHONE2);
+		params.add(p_FLEET);
+		params.add(p_COMMENTS);
+
+		for (Object val : params) {
+			System.out.println(" parametru : " + val);
+		}
+
+		UploadPortletRequest uploadRequest = PortalUtil.getUploadPortletRequest(request);
+
+		/*
+		 * fisaPV
+		 * fisaGDPR
+		 * fisaGarantie
+		 * garantieExtinsa
+		 * altele
+		 */
+		String sourceFileName1 = uploadRequest.getFileName("fisaPV");
+		String sourceFileName2 = uploadRequest.getFileName("fisaGDPR");
+		String sourceFileName3 = uploadRequest.getFileName("fisaGarantie");
+		String sourceFileName4 = uploadRequest.getFileName("garantieExtinsa");
+		String sourceFileName5 = uploadRequest.getFileName("altele");
+
+		File file1 = uploadRequest.getFile("fisaPV");
+		File file2 = uploadRequest.getFile("fisaGDPR");
+		File file3 = uploadRequest.getFile("fisaGarantie");
+		File file4 = uploadRequest.getFile("garantieExtinsa");
+		File file5 = uploadRequest.getFile("altele");
+
+		try {
+
+			if (file1 != null) {
+				blob1 = FileUtil.getBytes(file1);
+			}
+			if (file2 != null) {
+				blob2 = FileUtil.getBytes(file2);
+			}
+			if (file3 != null) {
+				blob3 = FileUtil.getBytes(file3);
+			}
+			if (file4 != null) {
+				blob4 = FileUtil.getBytes(file4);
+			}
+			if (file5.length() > 0) {
+				blob5 = FileUtil.getBytes(file5);
+			}
+
+			/*
+			 * APPS.hnd_warranty_pkg.attach_documents@HTEST (
+			 * p_htro_car_no => :P14_HTRO_CAR_NO, int
+			 * p_file_name => :nume fisier, string
+			 * p_file_type => tipul fisierului (pv gdpr .... ), string
+			 * p_blob => blob
+			 */
+
+			params2.add(carNo);
+			params2.add(sourceFileName1);
+			params2.add("PV");
+			params2.add(blob1);
+			files.add(params2);
+
+			params3.add(carNo);
+			params3.add(sourceFileName2);
+			params3.add("GDPR");
+			params3.add(blob2);
+			files.add(params3);
+
+			params4.add(carNo);
+			params4.add(sourceFileName3);
+			params4.add("Warranty");
+			params4.add(blob3);
+			files.add(params4);
+
+			params5.add(carNo);
+			params5.add(sourceFileName4);
+			params5.add("Extended Warranty");
+			params5.add(blob4);
+			files.add(params5);
+
+			if (blob5 != null) {
+				params6.add(carNo);
+				params6.add(sourceFileName5);
+				params6.add("Others");
+				params6.add(blob5);
+				files.add(params6);
+			}
+
+		}
+		catch (IOException e2) {
+			e2.printStackTrace();
+		}
+
+		hndApp_log.debug(
+			"GenerareWarrantyAction - userEmail ===>" + userEmail + " - carNO ===>" + carNo + " numeClient ===>" + numeClient +
+				" numeVanzator ===> " + numeVanzator);
+		try {
+			if (carNo > 0) {
+				DBConnection.getInstance().GenerateWarranty(params, files);
+				SessionMessages.add(request, "garantieGenerata");
+				response.setRenderParameter("mvcPath", "/htro_portofoliu/viewPortofoliu.jsp");
+			}
+			else {
+				SessionErrors.add(request, "garantieGenerataFailed");
+				hndApp_log.error("ID-ul Automobilului nu a fost citit corect!");
+				throw new Exception("ID-ul Automobilului nu a fost citit corect!");
+			}
+		}
+		catch (Exception e) {
+			hndApp_log.error("Exceptie generata la generateWarranty - ", e);
+			e.printStackTrace();
+			SessionErrors.add(request, e.getClass().getName());
+			SessionErrors.add(request, "garantieGenerataFailed");
+			PortalUtil.copyRequestParameters(request, response);
+			response.setRenderParameter("mvcPath", "/htro_actions/generateWarranty.jsp");
+		}
+	}
+
+	public void RequestProforma(ActionRequest request, ActionResponse response) {
+
+		try {
+			int carNo = ParamUtil.getInteger(request, "carNo");
+			int dealerID = ParamUtil.getInteger(request, "dealerID");
+			String userEmail = ParamUtil.getString(request, "userEmail");
+
+			hndApp_log.debug("RequestProforma - userEmail ===>" + userEmail + "- carNO ===>" + carNo + "- dealerID ===>" + dealerID);
+
+			if (carNo > 0) {
+				String messageOut = DBConnection.getInstance().RequestProforma(carNo, dealerID);
+
+				hndApp_log.debug("RequestProforma - messageOut = " + messageOut);
+
+				if (messageOut == null) {
+					SessionMessages.add(request, "proformaRequested");
+					response.setRenderParameter("mvcPath", "/htro_portofoliu/viewPortofoliu.jsp");
+				}
+				else {
+					hndApp_log.error("RequestProforma - Mesaj de eroare existent - " + messageOut);
+					SessionErrors.add(request, "proformaRequestedFailed");
+					PortalUtil.copyRequestParameters(request, response);
+					response.setRenderParameter("mvcPath", "/htro_actions/requestProforma.jsp");
+					throw new Exception(messageOut);
+				}
+			}
+			else {
+				hndApp_log.error("RequestProforma - ID-ul Automobilului nu a fost citit corect!");
+				throw new Exception("RequestProforma - ID-ul Automobilului nu a fost citit corect!");
+			}
+		}
+		catch (Exception e) {
+			hndApp_log.error("Exceptie generata la RequestProforma - ", e);
+			e.printStackTrace();
+			SessionErrors.add(request, e.getClass().getName());
+			SessionErrors.add(request, "proformaRequestedFailed");
+			PortalUtil.copyRequestParameters(request, response);
+			response.setRenderParameter("mvcPath", "/htro_actions/requestProforma.jsp");
 		}
 	}
 
@@ -792,7 +1121,6 @@ public class HtroDealersUpdatedPortlet extends MVCPortlet {
 			}
 		}
 		else {
-
 			// report back error that resource id was missing
 			hndApp_log.error("Exceptie generata in serveResource - Resource id not found!!");
 			SessionErrors.add(resourceRequest, this.getClass().getName());

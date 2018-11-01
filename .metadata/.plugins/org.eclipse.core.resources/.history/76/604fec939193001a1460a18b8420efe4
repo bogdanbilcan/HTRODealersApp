@@ -1,0 +1,48 @@
+<%@ include file="../init.jsp"%>
+
+<liferay-ui:success key="proformaRequested" message="proformaRequested" />
+<liferay-ui:error key="proformaRequestedFailed" message="proformaRequestedFailed" />
+<liferay-ui:error exception="HtroDealersUpdatedPortlet" key="proformaRequestedFailed" message="proformaRequestedFailed" />
+<liferay-portlet:renderURL var="backURL">
+	<portlet:param name="mvcPath" value="/htro_portofoliu/viewPortofoliu.jsp"></portlet:param>
+</liferay-portlet:renderURL>
+
+<liferay-portlet:actionURL name="RequestProforma" var="RequestProformaURL"></liferay-portlet:actionURL>
+
+<%
+	User currentUser = themeDisplay.getUser();
+	String userEmail = currentUser.getLogin();
+
+	int carNo = ParamUtil.getInteger(request, "carNo");
+	String tipRezervare = ParamUtil.getString(request, "tipRezervare");
+	boolean validateAction = false;
+	if (tipRezervare.equalsIgnoreCase("Temporara")) {
+		validateAction = true;
+		System.out.println("RequestProforma - tipRezervare =>>>" + tipRezervare);
+	}
+	System.out.println("RequestProforma - carNo =>>>" + carNo);
+	System.out.println("RequestProforma - userEmail =>>>" + userEmail);
+%>
+
+<aui:form action="<%=RequestProformaURL%>" name="<portlet:namespace />fm">
+	<aui:fieldset-group markupView="lexicon">
+		<h3>Anulare Rezervare:</h3>
+		<aui:fieldset>
+
+			<div class="alert alert-danger">
+				<strong class="lead">ATENTIE: Actiune ireversibila !! </strong>
+				<p>
+					Apasati <strong> Trimite </strong> pentru a genera Proforma sau <strong> Cancel </strong> pentru a renunta!
+				</p>
+			</div>
+
+			<aui:input name="userEmail" title="userEmail" type="hidden" value="<%=userEmail%>" />
+			<aui:input name="carNo" title="ID Automobil" value="<%=carNo%>" type="hidden" />
+
+		</aui:fieldset>
+	</aui:fieldset-group>
+	<aui:button-row>
+		<aui:button type="submit" value="Trimite" />
+		<aui:button onClick="<%=backURL.toString()%>" type="cancel" value="Cancel" />
+	</aui:button-row>
+</aui:form>

@@ -36,6 +36,10 @@
 		<item value="true" key="WizardZipFileResourceExportPage1.STORE_COMPRESS_CONTENTS_ID"/>
 		<item value="true" key="WizardZipFileResourceExportPage1.STORE_CREATE_STRUCTURE_ID"/>
 		<list key="WizardZipFileResourceExportPage1.STORE_DESTINATION_NAMES_ID">
+			<item value="C:\Users\admin\Documents\MEGA\HondaDealersApp\UpgradedHTRODealersApp-TEST-Active.zip"/>
+			<item value="C:\Users\admin\Documents\MEGA\HondaDealersApp\FullWorkspace.zip"/>
+			<item value="C:\Users\admin\Documents\MEGA\HondaDealersApp\UpgradedHTRODealersApp_PROD_V_Active.zip"/>
+			<item value="C:\Users\admin\Documents\MEGA\HondaDealersApp\UpgradedHTRODealersAppTESTVActive.zip"/>
 			<item value="C:\Users\admin\Documents\MEGA\HondaDealersApp\UpgradedHTRODealersAppVActive.zip"/>
 			<item value="C:\Users\admin\Documents\MEGA\HondaDealersApp\UpgradedHTRODealersAppV3.zip"/>
 			<item value="C:\Users\admin\Documents\MEGA\HondaDealersApp\UpgradedHTRODealersAppV2.zip"/>

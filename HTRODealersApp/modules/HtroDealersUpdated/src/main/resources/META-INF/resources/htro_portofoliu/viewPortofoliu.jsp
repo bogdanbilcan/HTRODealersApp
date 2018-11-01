@@ -1,8 +1,11 @@
 <%@include file="../init.jsp"%>
+
 <link rel="stylesheet" type="text/css"
 	href="https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.18/b-1.5.2/b-flash-1.5.2/b-html5-1.5.2/fh-3.1.4/datatables.min.css" />
+
 <script type="text/javascript"
 	src="https://cdn.datatables.net/v/bs/jszip-2.5.0/dt-1.10.18/b-1.5.2/b-flash-1.5.2/b-html5-1.5.2/fh-3.1.4/datatables.min.js"></script>
+
 <style>
 .message-container {
 	padding: 10px;
@@ -16,6 +19,7 @@ div.dt-buttons {
 	float: right;
 }
 </style>
+
 <script type="text/javascript">
 AUI.$ = jQuery.noConflict();
 
@@ -23,11 +27,11 @@ jQuery(document).ready(function() {
 	var table = jQuery('#portofoliu').DataTable(
     		{
     			scrollY: 700,
-    			lengthMenu: [[50, 75, 100, -1], [50, 75, 100, "All"]],
-    		    paging: true,
+    			//lengthMenu: [[50, 75, 100, -1], [50, 75, 100, "All"]],
+    		    paging: false,
     		    scrollX: true,
     		    scrollcolapse: true,
-    		    pagingType: "full_numbers",
+    		    //pagingType: "full_numbers",
     		    aaSorting: [],
     		    //dom: '<"top"lB>rt<"bottom"ip><"clear">',
     			dom: "<'row'<'col-sm-3'l><'col-sm-6 text-center'><'col-sm-3'B>>" +
@@ -41,7 +45,8 @@ jQuery(document).ready(function() {
 						title: '',
 		                text: 'Export Data to Excel',
 		                exportOptions: {
-		                    columns: '1,2,3,4,5,6,7,9,10,11,12,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28'
+		                    columns: '1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27'
+							//columns: '1,2,3,4,5,6,7,9,10,11,12,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28'
 		                }
 		            }
 				],
@@ -118,6 +123,10 @@ table.columns([1,10,16]).every(function() {
 <liferay-ui:error key="cerereproformaNetransmisa" message="cerereproforma-netransmisa" />
 <liferay-ui:error key="cerereNetransmisa" message="cerere-netransmisa" />
 <liferay-ui:error key="cerereNetransmisa2" message="cerere-netransmisa2" />
+<liferay-ui:error key="garantieGenerataFailed" message="garantieGenerataFailed" />
+<liferay-ui:error key="proformaRequestedFailed" message="proformaRequestedFailed" />
+<liferay-ui:success key="garantieGenerata" message="garantieGenerata" />
+<liferay-ui:success key="proformaRequested" message="proformaRequested" />
 
 <%
 	User currentUser = themeDisplay.getUser();
@@ -252,7 +261,7 @@ table.columns([1,10,16]).every(function() {
 						<!-- 5 -->
 						<th>Locatie</th>
 						<!-- 6 -->
-						<th>Luna sosire in tara</th>
+						<th>Sosire in tara</th>
 						<!-- 7 -->
 						<th>Transport</th>
 						<!-- 8 -->
@@ -266,7 +275,7 @@ table.columns([1,10,16]).every(function() {
 						<!-- 12 -->
 						<th>Culoare interior</th>
 						<!-- 13 -->
-						<th>Proforma</th>
+						<%-- <th>Proforma</th> --%>
 						<!-- 14 -->
 						<th>Nume client</th>
 						<!-- 15 -->
@@ -306,29 +315,32 @@ table.columns([1,10,16]).every(function() {
 									String numeClient = portofoliuItem.getNUME_CLIENT();
 									String numeVanzator = portofoliuItem.getNUME_VANZATOR();
 									String locatie = portofoliuItem.getLOCATIE();
-
+									int sold_cust_id = portofoliuItem.getSOLD_CUST_ID();
+									
+									
 									//boolean test1 = portofoliuItem.isPROFORMA();
 									//boolean test2 = portofoliuItem.isTRANSPORT();
 									//System.out.println("portofoliuItem carNo= " + carNo + " isPROFORMA= " + test1 + " isTransport= " + test2);
 
-									boolean validateAction = false;
-									boolean validateAction2 = false;
-
+									boolean validateAnulareRez = false;
+									boolean validateUpdateNames = false;
 									boolean validTransport = false;
 									boolean validProforma = false;
+									
+									boolean validateWarranty = false;
 
 									if (tipRezervare == null || tipRezervare.isEmpty()) {
 										tipRezervare = "null";
 									}
 
 									if (tipRezervare.equalsIgnoreCase("Temporara")) {
-										validateAction = true;
-										// 		System.out.println("tipRezervare =>>>" + tipRezervare);
+										validateAnulareRez = true;
+										//System.out.println("tipRezervare =>>>" + tipRezervare + " validateAnulareRez = "+validateAnulareRez);
 									}
 
 									if (tipRezervare.equalsIgnoreCase("Ferma") || tipRezervare.equalsIgnoreCase("Stoc")) {
-										validateAction2 = true;
-										// 		System.out.println("tipRezervare2 =>>>" + tipRezervare);
+										validateUpdateNames = true;
+										//System.out.println("tipRezervare2 =>>>" + tipRezervare + " validateUpdateNames= "+validateUpdateNames);
 									}
 
 									if (isAdmin) {
@@ -347,10 +359,19 @@ table.columns([1,10,16]).every(function() {
 											}
 										}
 									}
+									
+									if (sold_cust_id > 0 )
+									{
+										validateWarranty = true;
+										//System.out.println("portofoliuItem carNo= " + carNo + " - sold_cust_id: "+sold_cust_id + " - validateWarranty: "+validateWarranty +" - validProforma: "+validProforma+" - tipRezervare: "+tipRezervare);
+									}
+									
 					%>
 					<tr>
-						<td><liferay-ui:icon-menu direction="down" message="<%="Actiuni"%>">
-								<c:if test="<%=validateAction%>">
+						<td>
+							<liferay-ui:icon-menu direction="down" message="<%="Actiuni"%>">
+							
+								<c:if test="<%=validateAnulareRez%>">
 									<%--<liferay-portlet:renderURL var="anulareRezervaURL" windowState="<%=LiferayWindowState.POP_UP.toString()%>"> --%>
 
 									<liferay-portlet:renderURL var="anulareRezervaURL">
@@ -364,7 +385,8 @@ table.columns([1,10,16]).every(function() {
 									</span>
 
 								</c:if>
-								<c:if test="<%=validateAction%>">
+								
+								<c:if test="<%=validateAnulareRez%>">
 									<liferay-portlet:renderURL var="setRezervareFermaURL">
 										<portlet:param name="carNo" value="<%=carNo%>" />
 										<portlet:param name="tipRezervare" value="<%=tipRezervare%>" />
@@ -376,8 +398,8 @@ table.columns([1,10,16]).every(function() {
 									</span>
 
 								</c:if>
-								<c:if test="<%=validateAction2%>">
-
+								
+								<c:if test="<%=validateUpdateNames%>">
 									<liferay-portlet:renderURL var="updateClientNameURL">
 										<portlet:param name="carNo" value="<%=carNo%>" />
 										<portlet:param name="tipRezervare" value="<%=tipRezervare%>" />
@@ -391,7 +413,34 @@ table.columns([1,10,16]).every(function() {
 									</span>
 
 								</c:if>
-							</liferay-ui:icon-menu></td>
+								
+								<c:if test="<%=validProforma%>">
+									<liferay-portlet:renderURL var="requestProformaURL">
+										<portlet:param name="numeDealer" value="<%=portofoliuItem.getDEALER() %>" />
+										<portlet:param name="carNo" value="<%=carNo%>" />
+										<portlet:param name="dealerID" value="<%=String.valueOf(portofoliuItem.getRES_DEALER_ID())%>" />						
+										<portlet:param name="mvcPath" value="/htro_actions/requestProforma.jsp" />
+									</liferay-portlet:renderURL>
+									<span style="white-space: nowrap"> <liferay-ui:icon iconCssClass="icon-edit" label="<%=true%>" message="Gen. Proforma"
+											url="<%=requestProformaURL.toString()%>" />
+									</span>
+								</c:if>
+								
+								<c:if test="<%=validateWarranty%>">
+									
+									<liferay-portlet:renderURL var="generateWarrantyURL">
+										<portlet:param name="numeDealer" value="<%=portofoliuItem.getDEALER() %>" />
+										<portlet:param name="carNo" value="<%=carNo%>" />
+										<portlet:param name="dealerID" value="<%=String.valueOf(portofoliuItem.getRES_DEALER_ID())%>" />						
+										<portlet:param name="mvcPath" value="/htro_actions/generateWarranty.jsp" />
+									</liferay-portlet:renderURL>
+									<span style="white-space: nowrap"> <liferay-ui:icon iconCssClass="icon-edit" label="<%=true%>" message="Gen. Garantie"
+											url="<%=generateWarrantyURL.toString()%>" />
+									</span>
+								</c:if>
+								
+							</liferay-ui:icon-menu>
+						</td>
 						<td><%=portofoliuItem.getDEALER()%></td>
 						<td><%=portofoliuItem.getHTRO_CAR_NO()%></td>
 						<td><%=portofoliuItem.getTIP_LINIE()%></td>
@@ -410,13 +459,9 @@ table.columns([1,10,16]).every(function() {
 						<td><%=portofoliuItem.getCOD_CULOARE_EXT()%></td>
 						<td><%=portofoliuItem.getCULOARE_EXTERIOR()%></td>
 						<td><%=portofoliuItem.getCULOARE_INTERIOR()%></td>
-						<td style="text-align: center;"><c:if test="<%=validProforma%>">
-								<!--onClick="toggleBoxVisibility()" -->
-								<aui:input id="proforma" type="checkbox" disabled="<%=portofoliuItem.isPROFORMA()%>" checked="<%=portofoliuItem.isPROFORMA()%>"
-									name="proforma" label="<%=""%>" value="<%=portofoliuItem.toString()%>" />
-							</c:if> <c:if test="<%=!validProforma%>">
-								Indisponibil
-							</c:if></td>
+						
+						<%-- <td style="text-align: center;"><c:if test="<%=validProforma%>"> <!--onClick="toggleBoxVisibility()" --> <aui:input id="proforma" type="checkbox" disabled="<%=portofoliuItem.isPROFORMA()%>" checked="<%=portofoliuItem.isPROFORMA()%>" name="proforma" label="<%=""%>" value="<%=portofoliuItem.toString()%>" /> </c:if> <c:if test="<%=!validProforma%>"> Indisponibil </c:if></td> --%>
+							
 						<td><%=portofoliuItem.getNUME_CLIENT()%></td>
 						<td><%=portofoliuItem.getNUME_VANZATOR()%></td>
 						<td><%=portofoliuItem.getVIN()%></td>
@@ -466,7 +511,7 @@ table.columns([1,10,16]).every(function() {
 						<!-- 12 -->
 						<th>Culoare interior</th>
 						<!-- 13 -->
-						<th>Proforma</th>
+						<%-- <th>Proforma</th> --%>
 						<!-- 14 -->
 						<th>Nume client</th>
 						<!-- 15 -->
@@ -527,6 +572,7 @@ table.columns([1,10,16]).every(function() {
 		</div>
 	</c:if>
 </aui:form>
+
 <c:if test="<%=Validator.isNull(portofoliuItems1) || portofoliuItems1.isEmpty()%>">
 	<div class="message-container"><%=noResults%></div>
 </c:if>

@@ -1,0 +1,235 @@
+<%@ include file="../init.jsp"%>
+
+<liferay-ui:success key="garantieGenerata" message="garantieGenerata" />
+<liferay-ui:error key="garantieGenerataFailed" message="garantieGenerataFailed" />
+
+<liferay-portlet:renderURL var="backURL">
+	<portlet:param name="mvcPath" value="/htro_portofoliu/viewPortofoliu.jsp"></portlet:param>
+</liferay-portlet:renderURL>
+
+<%	
+	String carNo = ParamUtil.getString(request, "carNo");
+	String numeDealer = ParamUtil.getString(request, "numeDealer");
+	String dealerID = ParamUtil.getString(request, "dealerID");
+
+	System.out.println("GenerateWarranty - carNo =>>>" + carNo);
+	System.out.println("GenerateWarranty - numeVanzator =>>>" + numeDealer);
+	
+	//Date = 
+%>
+
+<liferay-portlet:actionURL name="GenerateWarranty" var="generateWarrantyURL">
+  <portlet:param name="carNo" value="<%=carNo%>" ></portlet:param>
+    <portlet:param name="numeDealer" value="<%=numeDealer%>" ></portlet:param>
+      <portlet:param name="dealerID" value="<%=dealerID%>" ></portlet:param>
+   </liferay-portlet:actionURL>
+      
+      <aui:form action="<%=generateWarrantyURL%>" method="POST" name="<portlet:namespace />fm">
+      
+        <aui:fieldset-group markupView="lexicon">
+        
+          <h3>Garantie - Introduceti detaliile:</h3>
+          <aui:fieldset markupView="lexicon">
+            <liferay-ui:message key="Retail Information:" />
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="numeDealer" label="Nume Dealer" title="Nume Dealer" />
+              </aui:col>
+              <aui:col>
+              
+                <%-- <aui:input name="retailDate" type="date" required="true" label="Retail Date" title="Retail Date"> <aui:validator name="required" errorMessage="Introduceti Retail Date!" /> </aui:input> --%>
+                
+                 <liferay-ui:input-date firstEnabledDate="<%= "05/10/2020"%>" lastEnabledDate="<%= "12/31/2020"%>" name="retailDate" required="true" title="Retail Date" >
+             <aui:validator name="required" errorMessage="Introduceti Retail Date!" />
+        	</liferay-ui:input-date>
+              </aui:col>
+              <aui:col>
+                <aui:input name="warrantyStartDate" type="date" required="true" label="Warranty Start Date" title="Warranty Start Date">
+                  <aui:validator name="required" errorMessage="Introduceti Warranty Start Date!" />
+                </aui:input>
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="paymentType" label="Payment Type" title="Payment Type" />
+              </aui:col>
+              <aui:col>
+                <aui:input name="leasingCompany" label="Leasing Company" title="Leasing Company" />
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input id="fleet" type="checkbox" checked="false" name="fleet" label="Fleet" />
+              </aui:col>
+              <aui:col>
+                <aui:input id="scrappage" type="checkbox" checked="false" name="scrappage" label="Scrappage" />
+              </aui:col>
+            </aui:row>
+          </aui:fieldset>
+          <aui:fieldset markupView="lexicon">
+            <liferay-ui:message key="Customer Details:" />
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="end_user_type" label="End User Type:" title="End User Type" />
+              </aui:col>
+              <aui:col>
+                <aui:input name="end_user_title" label="End User Title:" title="End User Title" />
+              </aui:col>
+              <aui:col>
+                <aui:input name="company" label="Company:" title="Company" />
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="firstName" required="true" label="First Name:" title="First Name">
+                  <aui:validator name="required" errorMessage="Introduceti Prenumele!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="lastName" required="true" label="Last Name:" title="Last Name">
+                  <aui:validator name="required" errorMessage="Introduceti Numele!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="userName" required="true" label="User Name:" title="User Name">
+                  <aui:validator name="required" errorMessage="Introduceti utilizatorul!" />
+                </aui:input>
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="birthDate" label="Birth Date" title="Birth Date" type="date" />
+              </aui:col>
+              <aui:col>
+                <aui:select label="Gender:" name="gender" showEmptyOption="true" required="true" showRequiredLabel="true">
+                  <aui:option label="Female" value="F" />
+                  <aui:option label="Male" value="M" />
+                </aui:select>
+              </aui:col>
+            </aui:row>
+          </aui:fieldset>
+          <aui:fieldset markupView="lexicon">
+            <liferay-ui:message key="Contact Information:" />
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="mobile1" label="Nr. Mobile1:" title="Nr. Mobile1" required="true">
+                  <aui:validator name="required" errorMessage="Introduceti Nr. Mobil!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="email1" label="Email1:" title="Email1" type="email" required="true">
+                  <aui:validator name="required" errorMessage="Introduceti Email!" />
+                </aui:input>
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="mobile2" label="Nr. Mobile2:" title="Nr. Mobile2" />
+              </aui:col>
+              <aui:col>
+                <aui:input name="email2" label="Email2:" title="Email2" type="email" />
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="strada" label="Strada:" title="Strada">
+                  <aui:validator name="required" errorMessage="Introduceti Strada!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="nr" label="Nr:" title="Nr">
+                  <aui:validator name="required" errorMessage="Introduceti Nr Strada!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="bloc" label="Bl:" title="Bl">
+                  <aui:validator name="required" errorMessage="Introduceti Nr Bloc!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="scara" label="Sc:" title="Sc">
+                  <aui:validator name="required" errorMessage="Introduceti Scara!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="etaj" label="Et:" title="Et">
+                  <aui:validator name="required" errorMessage="Introduceti Etaj!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="apartament" label="Ap:" title="Ap">
+                  <aui:validator name="required" errorMessage="Introduceti Apartament!" />
+                </aui:input>
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="judetSector" label="Judet/Sector" title="Judet/Sector">
+                  <aui:validator name="required" errorMessage="Introduceti Judet Sau Sector!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="oras" label="Oras" title="Oras">
+                  <aui:validator name="required" errorMessage="Introduceti Oras!" />
+                </aui:input>
+              </aui:col>
+              <aui:col>
+                <aui:input name="codPostal" label="Cod Postal:" title="Cod Postal">
+                  <aui:validator name="required" errorMessage="Introduceti Cod Postal!" />
+                </aui:input>
+              </aui:col>
+            </aui:row>
+            <aui:row style="display: flex;">
+              <aui:col>
+                <aui:input name="comments" type="textarea" label="Comments" title="Comments" />
+              </aui:col>
+            </aui:row>
+          </aui:fieldset>
+          <liferay-ui:message key="Contact Information:" />
+          <br />
+          <div style="display: flex ">
+            <label for="fisaPV">Incarca PV:</label>
+            <input type="file" name="fisaPV" id="fisaPV" required="true" onchange="return FileValidation(this)" />
+            <label for="fisaPV">Incarca GDPR:</label>
+            <input type="file" name="fisaGDPR" id="fisaGDPR" required="true" onchange="return FileValidation(this)" />
+            <label for="fisaPV">Incarca Garantie:</label>
+            <input type="file" name="fisaGarantie" id="fisaGarantie" required="true" onchange="return FileValidation(this)" />
+            <label for="fisaPV">Incarca Garantie Extinsa:</label>
+            <input type="file" name="garantieExtinsa" id="garantieExtinsa" required="true" onchange="return FileValidation(this)" />
+            <label for="fisaPV">Alte documente:</label>
+            <input type="file" name="altele" id="altele" onchange="return FileValidation(this)" />
+          </div>
+        </aui:fieldset-group>
+        
+        <aui:button-row>
+          <aui:button type="submit" value="Salveaza datele" />
+          <aui:button onClick="<%=backURL.toString()%>" type="cancel" value="Cancel" />
+        </aui:button-row>
+          
+        </aui:form>
+        
+<script type="text/javascript">
+  function FileValidation(fileInput) {
+    //var fileInput = document.getElementById('file');
+    var filePath = fileInput.value;
+    var allowedExtensions = /(\.pdf|\.jpg|\.jpeg|\.png|\.bpm|\.bmp|\.gif)$/;
+
+    if (filePath != '') {
+      var checkimg = filePath.toLowerCase();
+
+      if (!allowedExtensions.exec(checkimg)) {
+        alert('Fisierul selectat nu este suportat! Alegeti doar PDF sau imagini pentru upload!');
+        fileInput.value = '';
+        return false;
+      }
+
+      if ((fileInput.files[0].size / 1024) > 1048) {
+        alert("Fisierul selectat este prea mare! Alegeti doar fisiere ce au maxim 1 MB!");
+        fileInput.value = '';
+        return false;
+      }
+
+      return true;
+    }
+  }
+</script>

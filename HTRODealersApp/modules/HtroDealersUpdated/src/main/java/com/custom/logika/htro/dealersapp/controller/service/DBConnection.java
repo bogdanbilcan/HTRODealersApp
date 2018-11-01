@@ -1,6 +1,7 @@
 
 package com.custom.logika.htro.dealersapp.controller.service;
 
+import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
@@ -82,7 +83,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -117,9 +118,9 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!resultSet.isClosed())
+				if (resultSet != null && !resultSet.isClosed())
 					resultSet.close();
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -155,9 +156,9 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!resultSet.isClosed())
+				if (resultSet != null && !resultSet.isClosed())
 					resultSet.close();
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -206,7 +207,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -253,7 +254,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -266,7 +267,7 @@ public class DBConnection {
 	public List<String> GetColumnHeaders(String tableName)
 		throws Exception {
 
-		String sql = "select COLUMN_NAME from ALL_TAB_COLUMNS where TABLE_NAME=upper(?)";
+		String sql = "SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME=UPPER(?) ORDER BY COLUMN_ID ASC";
 
 		List<String> columnHeaders = new ArrayList<String>();
 		PreparedStatement statement = null;
@@ -298,7 +299,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -308,10 +309,10 @@ public class DBConnection {
 		}
 	}
 
-	public List<List<String>> ListTableItems(String tableName)
+	public List<List<Object>> ListTableItems(String tableName)
 		throws Exception {
 
-		List<List<String>> tableData = new ArrayList<>();
+		List<List<Object>> tableData = new ArrayList<>();
 
 		String sql1 = "select * from " + tableName;
 
@@ -326,38 +327,22 @@ public class DBConnection {
 				System.out.println("ListTableItems size = " + size);
 
 				while (resultSet.next()) {
-					List<String> listTableItems = new ArrayList<>();
+					List<Object> listTableItems = new ArrayList<>();
 					for (int i = 1; i <= size; i++) {
-						if (resultSet.getMetaData().getColumnType(i) == 2) {
-							String temp = resultSet.getInt(i) + "";
-							temp = temp.equalsIgnoreCase("null") ? "" : temp;
-							listTableItems.add(temp);
-						}
-						if (resultSet.getMetaData().getColumnType(i) == 93) {
-							String temp = resultSet.getDate(i) + "";
-							temp = temp.equalsIgnoreCase("null") ? "" : temp;
-							listTableItems.add(temp);
-						}
-						if (resultSet.getMetaData().getColumnType(i) == 12) {
-							String temp = resultSet.getString(i) + "";
-							temp = temp.equalsIgnoreCase("null") ? "" : temp;
-							listTableItems.add(temp);
-						}
-						if (resultSet.getMetaData().getColumnType(i) == 1) {
-							String temp = resultSet.getString(i) + "";
-							temp = temp.equalsIgnoreCase("null") ? "" : temp;
-							listTableItems.add(temp);
-						}
+						Object value = resultSet.getObject(i);
+						listTableItems.add(value == "null" ? "" : value);
 					}
 					tableData.add(listTableItems);
 				}
-				// for (int i = 1; i <= size; i++) {
-				// System.out.println(
-				// "ListTableItems getColumnType[" + i + "]= " +
-				// resultSet.getMetaData().getColumnType(i) + " - " +
-				// resultSet.getMetaData().getColumnTypeName(i));
-				//
-				// }
+
+				if (tableData.size() <= 0) {
+					hndApp_log.error("ListTableItems - Error - ResultSet is null so no values are there !!");
+					//throw new Exception("ResultSet is null so no values are there !!");
+				}
+			}
+			else {
+				hndApp_log.error("ListTableItems - Error - ResultSet is null so no values are there !!");
+				throw new Exception("ResultSet is null so no values are there !!");
 			}
 
 			resultSet.close();
@@ -371,7 +356,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -467,7 +452,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -546,7 +531,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -575,7 +560,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -603,7 +588,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -630,7 +615,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -676,7 +661,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -723,7 +708,7 @@ public class DBConnection {
 		}
 		finally {
 			try {
-				if (!statement.isClosed())
+				if (statement != null && !statement.isClosed())
 					statement.close();
 			}
 			catch (SQLException sqle) {
@@ -733,34 +718,318 @@ public class DBConnection {
 		}
 	}
 
-	private DBConnection() {
-		Thread thread = Thread.currentThread();
+	public void GenerateWarranty(List<Object> params, List<List<Object>> files)
+		throws Exception {
 
-		// Get the thread's class loader. You'll reinstate it after using
-		// the data source you look up using JNDI
+		/*
+		 * APPS.hnd_warranty_pkg.create_warranty@HTEST (
+		 * 1 p_HTRO_CAR_NO => :P14_HTRO_CAR_NO,
+		 * 2 p_WARRANTY_START_DATE => :P14_WARRANTY_START,
+		 * 3 p_DEALER_ID => :P14_DEALER_ID,
+		 * 4 p_RETAIL_DATE => :P14_RETAIL_DATE,
+		 * 5 p_END_USER_TYPE => :P14_END_USER_TYPE,
+		 * 6 p_END_USER_TITLE => :P14_END_USER_TITLE,
+		 * 7 p_PAYMENT_TYPE => :P14_PAYMENT_TYPE,
+		 * 8 p_LEASING_COMPANY => :P14_LEASING_COMP,
+		 * 9 p_SCRAPPAGE => :P14_SCRAPPAGE,
+		 * 10 p_END_USER_NAME => :P14_USER_NAME,
+		 * 11 p_FIRST_NAME => :P14_FIRST_NAME,
+		 * 12 p_LAST_NAME => :P14_LAST_NAME,
+		 * 13 p_BIRTH_DATE => :P14_BIRTH_DATE,
+		 * 14 p_GENDER => :P14_GENDER,
+		 * 15 p_COMPANY => :P14_COMPANY,
+		 * 16 p_ADDRESS => '',
+		 * 17 p_ADDR_COUNTY_ABBRV => :P14_JUD_SECT,
+		 * 18 p_ADDR_TOWN_OR_CITY => :P14_ORAS,
+		 * 19 p_addr_street => :P14_STRADA,
+		 * 20 p_addr_no => :P14_NR,
+		 * 21 p_addr_building => :P14_BLOC,
+		 * 22 p_addr_entrance => :P14_SCARA,
+		 * 23 p_addr_floor => :P14_ETAJ,
+		 * 24 p_addr_appartment_no => :P14_APARTMANET,
+		 * 25 p_POSTAL_CODE => :P14_COD_POSTAL,
+		 * 26 p_EMAIL1 => :P14_EMAIL_1,
+		 * 27 p_EMAIL2 => :P14_EMAIL_2,
+		 * 28 p_MOBILE_PHONE1 => :P14_MOBILE_1,
+		 * 29 p_MOBILE_PHONE2 => :P14_MOBILE_2,
+		 * 30 p_MARKETING => :P14_FLEET,
+		 * 31 p_COMMENTS => :P14_COMMENTS);
+		 * ---
+		 * APPS.hnd_warranty_pkg.attach_documents@HTEST (
+		 * p_htro_car_no => :P14_HTRO_CAR_NO, int
+		 * p_file_name => :nume fisier, string
+		 * p_file_type => tipul fisierului (pv gdpr .... ), string
+		 * p_blob => blob
+		 * );
+		 */
+		String p_msgOut = "";
+		CallableStatement statement = null;
+		final String procedureCall =
+			"{call apps.hnd_warranty_pkg.create_warranty(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}";
 
-		ClassLoader origLoader = thread.getContextClassLoader();
+		final String procedureCall2 = "{call apps.hnd_warranty_pkg.attach_documents(?,?,?,?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
 
-		// Set Liferay's class loader on the thread
+			System.out.println("params.size()=" + params.size());
 
-		thread.setContextClassLoader(PortalClassLoaderUtil.getClassLoader());
+			for (int i = 0; i < params.size(); i++) {
+				if (i == 0 || i == 2) {
+					statement.setInt(i + 1, (int) params.get(i));
+				}
+				else if (i == 1 || i == 3 || i == 12) {
+					statement.setDate(i + 1, (Date) params.get(i));
+				}
+				else {
+					statement.setString(i + 1, (String) params.get(i));
+				}
+			}
+
+			statement.registerOutParameter(32, Types.VARCHAR);
+			statement.execute();
+			p_msgOut = statement.getString(32);
+
+			System.out.println("p_msgOut = " + p_msgOut);
+
+			if (p_msgOut != null)
+				if (!p_msgOut.equalsIgnoreCase("null")) {
+				System.out.println("p_msgOut = " + p_msgOut);
+				hndApp_log.error("GenerateWarranty - Error calling PLSQL procedure ");
+				throw new Exception("Exceptie la salvarea datelor");
+				}
+
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GenerateWarranty - Error closing SQL statement ", sqle);
+				sqle.printStackTrace();
+			}
+
+			statement = jdbcConnection.prepareCall(procedureCall2);
+
+			//List<Object> params2 = new ArrayList<Object>();
+
+			System.out.println("files.size) = " + files.size());
+
+			for (List<Object> params2 : files) {
+
+				//params2 = files.get(0);
+				System.out.println("params2.size) = " + params2.size());
+				System.out.println("params2.get(0) = " + params2.get(0));
+				System.out.println("params2.get(1) = " + params2.get(1));
+				System.out.println("params2.get(2) = " + params2.get(2));
+				System.out.println("params2.get(3) = " + params2.get(3));
+
+				Blob aBlob = jdbcConnection.createBlob();
+				aBlob.setBytes(1, (byte[]) params2.get(3));
+
+				statement.setInt(1, (int) params2.get(0));
+				statement.setString(2, (String) params2.get(1));
+				statement.setString(3, (String) params2.get(2));
+				statement.setBlob(4, aBlob);
+
+				statement.execute();
+				aBlob.free();
+
+			}
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GenerateWarranty - Error calling PLSQL procedure ", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GenerateWarranty - Error closing SQL statement ", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public String RequestProforma(int carNo, int dealerId)
+		throws Exception {
+
+		/*
+		 * hnd_om_dealer_app_pkg.create_order (CAR_NO, DEAKER_ID);
+		 * CallableStatement cstmt =
+		 * conn.prepareCall("begin ? := TEST_FUNC(?,?); end;");
+		 * cstmt.registerOutParameter(1, Types.INTEGER);
+		 * cstmt.setString(2, "Test");
+		 * cstmt.setInt(3, 1001);
+		 * cstmt.execute();
+		 * int result = cstmt.getInt(1);
+		 * System.out.print("Result: " + result);
+		 * cstmt.close();
+		 * conn.close();
+		 */
+
+		CallableStatement statement = null;
+		String p_msgOut = "";
+		final String functionCall = "begin ? := apps.hnd_om_dealer_app_pkg.create_order(?,?); end;";
+
+		try {
+			statement = jdbcConnection.prepareCall(functionCall);
+			statement.setInt(2, carNo);
+			statement.setInt(3, dealerId);
+			statement.registerOutParameter(1, Types.VARCHAR);
+			statement.execute();
+			p_msgOut = statement.getString(1);
+
+			return p_msgOut;
+		}
+
+		catch (SQLException sqle) {
+
+			// System.out.println("Error calling PLSQL procedure " +
+			// sqle.getMessage());
+
+			hndApp_log.error("CancelRezervation - Error calling PLSQL function", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("CancelRezervation - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public Map<String, String> GetWarrantyDropDownValues(String field) {
+
+		String sql1 =
+			"SELECT FLV.LOOKUP_CODE RESPONSE, FLV.LOOKUP_CODE DISPLAY FROM APPS.FND_LOOKUP_VALUES FLV WHERE FLV.LOOKUP_TYPE = 'HND_PAYMENT_TYPE' AND FLV.LANGUAGE = 'US' AND FLV.ENABLED_FLAG = 'Y' AND FLV.END_DATE_ACTIVE IS NULL ORDER BY FLV.TAG";
+		String sql2 =
+			"SELECT LOOKUP_CODE RESPONSE, DESCRIPTION DISPLAY FROM APPS.FND_LOOKUP_VALUES WHERE LOOKUP_TYPE = 'HND_RO_JUDETE' AND LANGUAGE = 'US' AND ENABLED_FLAG = 'Y' AND END_DATE_ACTIVE IS NULL";
+		String sql3 =
+			"SELECT FLV.LOOKUP_CODE RESPONSE, FLV.DESCRIPTION DISPLAY FROM APPS.FND_LOOKUP_VALUES FLV WHERE FLV.LOOKUP_TYPE = 'HND_END_USER_TYPE' AND FLV.LANGUAGE = 'US' AND FLV.ENABLED_FLAG = 'Y' AND FLV.END_DATE_ACTIVE IS NULL ORDER BY FLV.TAG";
+		String sql4 =
+			"SELECT LOOKUP_CODE RESPONSE, MEANING DISPLAY, TAG FROM APPS.FND_LOOKUP_VALUES WHERE LOOKUP_TYPE = 'HND_RO_LOCALITATI' AND LANGUAGE = 'US' AND ENABLED_FLAG = 'Y' AND END_DATE_ACTIVE IS NULL ORDER BY LOOKUP_CODE";
+
+		Map<String, String> results = new HashMap<String, String>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+
 		try {
 
+			switch (field) {
+				case "Payment":
+					statement = jdbcConnection.prepareStatement(sql1);
+					resultSet = statement.executeQuery();
+					while (resultSet.next()) {
+						String RESPONSE = resultSet.getString("RESPONSE");
+						String DISPLAY = resultSet.getString("DISPLAY");
+						results.put(RESPONSE, DISPLAY);
+					}
+					break;
+				case "County":
+					statement = jdbcConnection.prepareStatement(sql2);
+					resultSet = statement.executeQuery();
+					while (resultSet.next()) {
+						String RESPONSE = resultSet.getString("RESPONSE");
+						String DISPLAY = resultSet.getString("DISPLAY");
+						results.put(RESPONSE, DISPLAY);
+					}
+					break;
+				case "EndUser":
+					statement = jdbcConnection.prepareStatement(sql3);
+					resultSet = statement.executeQuery();
+					while (resultSet.next()) {
+						String RESPONSE = resultSet.getString("RESPONSE");
+						String DISPLAY = resultSet.getString("DISPLAY");
+						results.put(RESPONSE, DISPLAY);
+					}
+					break;
+				case "City":
+					statement = jdbcConnection.prepareStatement(sql4);
+					resultSet = statement.executeQuery();
+					while (resultSet.next()) {
+						String RESPONSE = resultSet.getString("RESPONSE");
+						String DISPLAY = resultSet.getString("DISPLAY");
+						RESPONSE = RESPONSE + "^" + DISPLAY + "|" + resultSet.getString("TAG");
+						results.put(RESPONSE, DISPLAY);
+					}
+					break;
+			}
+
+			resultSet.close();
+			statement.close();
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GetPortfDealers - Error executing query statement", sqle);
+		}
+		finally {
+			try {
+				if (resultSet != null && !resultSet.isClosed())
+					resultSet.close();
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GetPortfDealers - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+		return results;
+	}
+
+	private DBConnection() {
+
+		/*
+		 * try {
+		 * Class.forName(driver);
+		 * Properties properties = new Properties();
+		 * properties.put("user", userName);
+		 * properties.put("password", userPassword);
+		 * properties.put("defaultRowPrefetch", "100");
+		 * jdbcConnection = DriverManager.getConnection(dbURL, properties);
+		 * }
+		 * catch (ClassNotFoundException | SQLException ex) {
+		 * hndApp_log.error("DBConnection - Exception", ex);
+		 * ex.printStackTrace();
+		 * }
+		 * finally {
+		 * try {
+		 * if (jdbcConnection != null && !jdbcConnection.isClosed())
+		 * jdbcConnection.close();
+		 * }
+		 * catch (SQLException e) {
+		 * hndApp_log.
+		 * error("DBConnection - SQLException when closing DB connection", e);
+		 * e.printStackTrace();
+		 * }
+		 * }
+		 * private static String dbURL =
+		 * "jdbc:oracle:thin:@207.129.208.16:1522:TEST";
+		 * private static String userName = "XXDA";
+		 * private static String userPassword = "Honda123!";
+		 * private static String driver = "oracle.jdbc.driver.OracleDriver";
+		 */
+
+		Thread thread = Thread.currentThread();
+		// Get the thread's class loader. You'll reinstate it after using
+		// the data source you look up using JNDI
+		ClassLoader origLoader = thread.getContextClassLoader();
+		// Set Liferay's class loader on the thread
+		thread.setContextClassLoader(PortalClassLoaderUtil.getClassLoader());
+		try {
 			// Retrieve the name of the JNDI Datasource from
 			// portal-ext.properties
-
 			dsname = PropsUtil.get("jdbc.external.jndi.name");
-
 			// Look up the data source and connect to it
-
 			InitialContext iContext = new InitialContext();
-
 			// dataSource = (DataSource)
 			// iContext.lookup("java:comp/env/jdbc/CustomDBPoolShared");
-
 			dataSource = (DataSource) iContext.lookup("java:comp/env/" + dsname);
 			jdbcConnection = dataSource.getConnection();
-
 		}
 		catch (NamingException ne) {
 			ne.printStackTrace();
@@ -768,14 +1037,12 @@ public class DBConnection {
 		catch (SQLException sqle) {
 			hndApp_log.error("DBConnection - SQLException", sqle);
 			sqle.printStackTrace();
-
 		}
 		finally {
-
 			// Switch back to the original context class loader
-
 			thread.setContextClassLoader(origLoader);
 		}
+
 	}
 
 	private static final Log hndApp_log = LogFactoryUtil.getLog(DBConnection.class);
@@ -787,7 +1054,6 @@ public class DBConnection {
 	private static final class SingletonHolder {
 
 		private static final DBConnection SINGLETON = new DBConnection();
-
 	}
 
 }

@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet"%>
+
 <%@ taglib uri="http://liferay.com/tld/aui" prefix="aui"%>
 <%@ taglib uri="http://liferay.com/tld/portlet" prefix="liferay-portlet"%>
 <%@ taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme"%>
@@ -43,25 +44,20 @@
 <%@ page import="com.liferay.portal.kernel.search.Document"%>
 <%@ page import="com.liferay.portal.kernel.search.Field"%>
 <%@ page import="com.liferay.portal.kernel.portlet.LiferayWindowState"%>
-
 <%@ page import="com.liferay.expando.kernel.model.ExpandoColumnConstants"%>
-
 <%@ page import="java.util.List"%>
+<%@ page import="java.util.Date"%>
 <%@ page import="java.util.Objects"%>
 <%@ page import="java.util.Map"%>
 <%@ page import="java.util.HashMap"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="java.util.Arrays"%>
-
 <%@ page import="java.time.LocalTime"%>
 <%@ page import="java.time.Clock"%>
 <%@ page import="java.time.ZoneId"%>
-
 <%@ page import="java.io.Serializable"%>
-
 <%@ page import="javax.portlet.PortletURL"%>
 <%@ page import="javax.portlet.WindowState"%>
-
 <%@ page import="com.custom.logika.htro.dealersapp.model.StocItem"%>
 <%@ page import="com.custom.logika.htro.dealersapp.model.PortofoliuItem"%>
 <%@ page import="com.custom.logika.htro.dealersapp.controller.service.DBConnection"%>

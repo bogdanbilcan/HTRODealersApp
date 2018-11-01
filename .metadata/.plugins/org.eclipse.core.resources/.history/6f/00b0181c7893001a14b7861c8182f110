@@ -1,0 +1,929 @@
+
+package com.custom.logika.htro.dealersapp.controller.service;
+
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+import com.custom.logika.htro.dealersapp.controller.dao.PortofoliuItemDAO;
+import com.custom.logika.htro.dealersapp.controller.dao.StocItemDAO;
+import com.custom.logika.htro.dealersapp.model.PortofoliuItem;
+import com.custom.logika.htro.dealersapp.model.StocItem;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
+import com.liferay.portal.kernel.util.PropsUtil;
+
+public class DBConnection {
+
+	public static DBConnection getInstance() {
+
+		return SingletonHolder.SINGLETON;
+	}
+
+	public List<List<String>> getSearchedAndRes()
+		throws Exception {
+
+		List<List<String>> tableData = new ArrayList<>();
+
+		String sql1 = "select * from hnd_search_and_res_v";
+
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		try {
+			statement = jdbcConnection.prepareStatement(sql1);
+			resultSet = statement.executeQuery();
+
+			if (resultSet != null) {
+				int size = resultSet.getMetaData().getColumnCount();
+
+				// System.out.println("ListTableItems size = " + size);
+
+				while (resultSet.next()) {
+					List<String> listTableItems = new ArrayList<>();
+					for (int i = 1; i <= size; i++) {
+						if (resultSet.getMetaData().getColumnType(i) == 2) {
+							String temp = resultSet.getInt(i) + "";
+							temp = temp.equalsIgnoreCase("null") ? "" : temp;
+							listTableItems.add(temp);
+						}
+						if (resultSet.getMetaData().getColumnType(i) == 12) {
+							String temp = resultSet.getString(i) + "";
+							temp = temp.equalsIgnoreCase("null") ? "" : temp;
+							listTableItems.add(temp);
+						}
+					}
+					tableData.add(listTableItems);
+				}
+			}
+
+			resultSet.close();
+			statement.close();
+
+			return tableData;
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("getSearchedAndRes - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("getSearchedAndRes - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public Map<String, String> getDealers() {
+
+		String sql = "SELECT DISTINCT DEALERS.CUSTOMER_NAME as DEALER, customer_id AS DEALER_ID FROM HND_DEALERS_V DEALERS ORDER BY 1 ASC";
+
+		Map<String, String> dealers = new HashMap<String, String>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+
+		try {
+			statement = jdbcConnection.prepareStatement(sql);
+			resultSet = statement.executeQuery();
+
+			while (resultSet.next()) {
+				String DEALER = resultSet.getString("DEALER");
+				String DEALER_ID = resultSet.getString("DEALER_ID");
+				dealers.put(DEALER, DEALER_ID);
+			}
+			resultSet.close();
+			statement.close();
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GetPortfDealers - Error executing query statement", sqle);
+		}
+		finally {
+			try {
+				if (resultSet != null && !resultSet.isClosed())
+					resultSet.close();
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GetPortfDealers - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+		return dealers;
+	}
+
+	public List<String> GetPortfDealers() {
+
+		String sql =
+			"SELECT DISTINCT DEALERS.CUSTOMER_NAME AS DEALER FROM HND_DEALER_PORTOFOLIO_V PORTOF, HND_DEALERS_V DEALERS WHERE PORTOF.RES_DEALER_ID LIKE DEALERS.CUSTOMER_ID ORDER BY 1 ASC";
+
+		List<String> portfDealers = new ArrayList<String>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+
+		try {
+			statement = jdbcConnection.prepareStatement(sql);
+			resultSet = statement.executeQuery();
+
+			while (resultSet.next()) {
+				String DEALER = resultSet.getString("DEALER");
+				portfDealers.add(DEALER);
+			}
+			resultSet.close();
+			statement.close();
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GetPortfDealers - Error executing query statement", sqle);
+		}
+		finally {
+			try {
+				if (resultSet != null && !resultSet.isClosed())
+					resultSet.close();
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GetPortfDealers - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+		return portfDealers;
+	}
+
+	public String SetStatusCereri(int carNo, boolean proforma, boolean transport)
+		throws Exception {
+
+		/*
+		 * procedure create_reservation(p_htro_car_no number, p_dealer_id
+		 * number, p_reservation_type varchar2, p_customer_name varchar2,
+		 * p_salesmen_name varchar2, p_user_name varchar2, p_msg out varchar2);
+		 */
+
+		CallableStatement statement = null;
+		String p_msgOut = "";
+
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.set_status_cereri(?, ?, ?, ?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+
+			statement.setInt(1, carNo);
+			statement.setBoolean(2, proforma);
+			statement.setBoolean(3, transport);
+			statement.registerOutParameter(4, Types.VARCHAR);
+
+			statement.execute();
+
+			p_msgOut = statement.getString(7);
+
+			return p_msgOut;
+
+		}
+		catch (SQLException sqle) {
+
+			// System.out.println("MakeRezervation - Error calling PLSQL
+			// procedure " + sqle.getMessage());
+
+			hndApp_log.error("SetStatusCereri - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("SetStatusCereri - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public String CancelRezervation(int carNo, String userEmail)
+		throws Exception {
+
+		/*
+		 * create or replace package hnd_dealer_app_pkg as procedure
+		 * create_reservation(p_htro_car_no number, p_dealer_id number,
+		 * p_reservation_type varchar2, p_customer_name varchar2,
+		 * p_salesmen_name varchar2); procedure cancel_reservation(p_htro_car_no
+		 * number); procedure update_reservation(p_htro_car_no number);
+		 * procedure update_customer_name(p_htro_car_no number, p_customer_name
+		 * varchar2); end;
+		 */
+
+		CallableStatement statement = null;
+		String p_msgOut = "";
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.cancel_reservation(?,?,?)}";
+
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+			statement.setInt(1, carNo);
+			statement.setString(2, userEmail);
+			statement.registerOutParameter(3, Types.VARCHAR);
+			statement.execute();
+			p_msgOut = statement.getString(3);
+
+			return p_msgOut;
+		}
+		catch (SQLException sqle) {
+
+			// System.out.println("Error calling PLSQL procedure " +
+			// sqle.getMessage());
+
+			hndApp_log.error("CancelRezervation - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("CancelRezervation - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public List<String> GetColumnHeaders(String tableName)
+		throws Exception {
+
+		String sql = "SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME=UPPER(?) ORDER BY COLUMN_ID ASC";
+
+		List<String> columnHeaders = new ArrayList<String>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+
+		try {
+			statement = jdbcConnection.prepareStatement(sql);
+			statement.setString(1, tableName);
+			resultSet = statement.executeQuery();
+
+			while (resultSet.next()) {
+				String COLUMN_NAME = resultSet.getString("COLUMN_NAME");
+				columnHeaders.add(COLUMN_NAME);
+			}
+
+			resultSet.close();
+			statement.close();
+
+			return columnHeaders;
+
+		}
+		catch (SQLException sqle) {
+
+			// System.out.println("MakeRezervation - Error calling PLSQL
+			// procedure " + sqle.getMessage());
+
+			hndApp_log.error("MakeRezervation - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("MakeRezervation - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public List<List<Object>> ListTableItems(String tableName)
+		throws Exception {
+
+		List<List<Object>> tableData = new ArrayList<>();
+
+		String sql1 = "select * from " + tableName;
+
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		try {
+			statement = jdbcConnection.prepareStatement(sql1);
+			resultSet = statement.executeQuery();
+
+			if (resultSet != null) {
+				int size = resultSet.getMetaData().getColumnCount();
+				System.out.println("ListTableItems size = " + size);
+
+				while (resultSet.next()) {
+					List<Object> listTableItems = new ArrayList<>();
+					for (int i = 1; i <= size; i++) {
+						Object value = resultSet.getObject(i);
+						listTableItems.add(value == "null" ? "" : value);
+					}
+					tableData.add(listTableItems);
+				}
+
+				if (tableData.size() <= 0) {
+					hndApp_log.error("ListTableItems - Error - ResultSet is null so no values are there !!");
+					//throw new Exception("ResultSet is null so no values are there !!");
+				}
+			}
+			else {
+				hndApp_log.error("ListTableItems - Error - ResultSet is null so no values are there !!");
+				throw new Exception("ResultSet is null so no values are there !!");
+			}
+
+			resultSet.close();
+			statement.close();
+
+			return tableData;
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("ListTableItems - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("ListTableItems - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public List<PortofoliuItem> GetAllPortofoliuItems(String dealerID, boolean isAdmin, String tipAutoveh) {
+
+		PortofoliuItemDAO portofoliuItemDAO = new PortofoliuItemDAO(jdbcConnection);
+		try {
+			return portofoliuItemDAO.ListAllPortofoliuItems(dealerID, isAdmin, tipAutoveh);
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GetAllPortofoliuItems - SQLException", sqle);
+			sqle.printStackTrace();
+		}
+
+		return new ArrayList<>();
+	}
+
+	public List<StocItem> GetFilteredStocItems(String tipAuto, String culoareExterior, String tipAutoveh) {
+
+		StocItemDAO stocItemDAO = new StocItemDAO(jdbcConnection);
+		try {
+			return stocItemDAO.ListFilteredStocItems(tipAuto, culoareExterior, tipAutoveh);
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GetFilteredStocItems - SQLException", sqle);
+			sqle.printStackTrace();
+		}
+
+		return new ArrayList<>();
+	}
+
+	public List<String> GetSecondRezDetails(String htroCarNo)
+		throws Exception {
+
+		List<String> secondRezDetails = new ArrayList<>();
+
+		final String procedureCall = "{ call apps.hnd_dealer_app_pkg.next_available_car_info(?, ?, ?, ?) }";
+		Date p_reservation_end_date = null;
+		String p_location = "";
+		String p_arrival_date = "";
+		int carNo = Integer.parseInt(htroCarNo);
+		CallableStatement statement = null;
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+
+			statement.setInt(1, carNo);
+			statement.registerOutParameter(2, Types.DATE);
+			statement.registerOutParameter(3, Types.VARCHAR);
+			statement.registerOutParameter(4, Types.VARCHAR);
+
+			statement.execute();
+
+			p_reservation_end_date = statement.getDate(2);
+			p_location = statement.getString(3);
+			p_arrival_date = statement.getString(4);
+
+			p_arrival_date = p_arrival_date == null ? "" : p_arrival_date;
+
+			if (p_reservation_end_date != null) {
+				DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+
+				String reservation_end_date = df.format(p_reservation_end_date);
+
+				/*
+				 * String arrival_date = ""; if (p_arrival_date != null) {
+				 * arrival_date = df.format(p_arrival_date); }
+				 */
+
+				secondRezDetails.add(reservation_end_date);
+				secondRezDetails.add(p_location);
+				secondRezDetails.add(p_arrival_date);
+
+				return secondRezDetails;
+			}
+			else {
+				return secondRezDetails;
+			}
+
+		}
+		catch (SQLException sqle) {
+
+			// System.out.println("Error calling PLSQL procedure " +
+			// sqle.getMessage());
+
+			hndApp_log.error("GetSecondRezDetails - Error calling PLSQL procedure ", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GetSecondRezDetails - Error closing sql statement ", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public List<String> GetStocCuloareExt(String tipAuto, String tipAutoveh) {
+
+		StocItemDAO stocItemDAO = new StocItemDAO(jdbcConnection);
+		try {
+			return stocItemDAO.List_Culoare_Ext(tipAuto, tipAutoveh);
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GetStocCuloareExt - SQLException", sqle);
+			sqle.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+
+	public List<String> GetStocTipAuto(String tipAutoveh) {
+
+		StocItemDAO stocItemDAO = new StocItemDAO(jdbcConnection);
+		try {
+			return stocItemDAO.List_Tip_Auto(tipAutoveh);
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GetStocTipAuto - SQLException", sqle);
+			sqle.printStackTrace();
+		}
+
+		return new ArrayList<>();
+	}
+
+	public String MakeRezervation(
+		int carNo, int dealerID, String rezervationType, String customerName, String salesmenName, String userEmail)
+		throws Exception {
+
+		/*
+		 * procedure create_reservation(p_htro_car_no number, p_dealer_id
+		 * number, p_reservation_type varchar2, p_customer_name varchar2,
+		 * p_salesmen_name varchar2, p_user_name varchar2, p_msg out varchar2);
+		 */
+
+		CallableStatement statement = null;
+		String p_msgOut = "";
+
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.create_reservation(?, ?, ?, ?, ?, ?, ?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+
+			statement.setInt(1, carNo);
+			statement.setInt(2, dealerID);
+			statement.setString(3, rezervationType);
+			statement.setString(4, customerName);
+			statement.setString(5, salesmenName);
+			statement.setString(6, userEmail);
+			statement.registerOutParameter(7, Types.VARCHAR);
+
+			statement.execute();
+
+			p_msgOut = statement.getString(7);
+
+			return p_msgOut;
+
+		}
+		catch (SQLException sqle) {
+
+			// System.out.println("MakeRezervation - Error calling PLSQL
+			// procedure " + sqle.getMessage());
+
+			hndApp_log.error("MakeRezervation - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("MakeRezervation - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public void RegisterCarSearch(int dealerId, String tipAuto, String culoareExterior)
+		throws Exception {
+
+		CallableStatement statement = null;
+
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.record_car_search(?,?,?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+			statement.setInt(1, dealerId);
+			statement.setString(2, tipAuto);
+			statement.setString(3, culoareExterior);
+			statement.execute();
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("RegisterCarSearch - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("RegisterCarSearch - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+
+	}
+
+	public void RegisterCerereTransport(int carNo)
+		throws Exception {
+
+		CallableStatement statement = null;
+
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.set_int_requested_date(?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+			statement.setInt(1, carNo);
+			statement.execute();
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("RegisterCerereTransport - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("RegisterCerereTransport - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public void RegisterCerereProforma(int carNo)
+		throws Exception {
+
+		CallableStatement statement = null;
+
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.set_prof_requested_date(?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+			statement.setInt(1, carNo);
+			statement.execute();
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("RegisterCerereProforma - Error calling PLSQL procedure", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("RegisterCerereProforma - Error closing statement", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public String SetFirmRezervation(int carNo, String userName)
+		throws Exception {
+
+		/*
+		 * create or replace package hnd_dealer_app_pkg as procedure
+		 * create_reservation(p_htro_car_no number, p_dealer_id number,
+		 * p_reservation_type varchar2, p_customer_name varchar2,
+		 * p_salesmen_name varchar2); procedure cancel_reservation(p_htro_car_no
+		 * number); procedure update_reservation(p_htro_car_no number);
+		 * procedure update_customer_name(p_htro_car_no number, p_customer_name
+		 * varchar2); end;
+		 */
+		String p_msgOut = "";
+		CallableStatement statement = null;
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.update_reservation(?,?,?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+			statement.setInt(1, carNo);
+			statement.setString(2, userName);
+			statement.registerOutParameter(3, Types.VARCHAR);
+			statement.execute();
+			p_msgOut = statement.getString(3);
+			p_msgOut = statement.getString(3);
+
+			return p_msgOut;
+		}
+		catch (SQLException sqle) {
+
+			// System.out.println("Error calling PLSQL procedure " +
+			// sqle.getMessage());
+
+			hndApp_log.error("SetFirmRezervation - Error calling PLSQL procedure ", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("SetFirmRezervation - Error closing SQL statement ", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public String UpdateCustomerName(int carNo, String customerName, String salesmenName, String userEmail)
+		throws Exception {
+
+		/*
+		 * create or replace package hnd_dealer_app_pkg as procedure
+		 * create_reservation(p_htro_car_no number, p_dealer_id number,
+		 * p_reservation_type varchar2, p_customer_name varchar2,
+		 * p_salesmen_name varchar2); procedure cancel_reservation(p_htro_car_no
+		 * number); procedure update_reservation(p_htro_car_no number);
+		 * procedure update_customer_name(p_htro_car_no number, p_customer_name
+		 * varchar2); end;
+		 */
+		String p_msgOut = "";
+		CallableStatement statement = null;
+		final String procedureCall = "{call apps.hnd_dealer_app_pkg.update_reservation_details(?,?,?,?,?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+			statement.setInt(1, carNo);
+			statement.setString(2, customerName);
+			statement.setString(3, salesmenName);
+			statement.setString(4, userEmail);
+			statement.registerOutParameter(5, Types.VARCHAR);
+			statement.execute();
+			p_msgOut = statement.getString(5);
+
+			return p_msgOut;
+		}
+		catch (SQLException sqle) {
+
+			// System.out.println("Error calling PLSQL procedure " +
+			// sqle.getMessage());
+
+			hndApp_log.error("UpdateCustomerName - Error calling PLSQL procedure ", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("UpdateCustomerName - Error closing SQL statement ", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	public void GenerateWarranty(List<Object> params, List<List<Object>> files)
+		throws Exception {
+
+		/*
+		 * APPS.hnd_warranty_pkg.create_warranty@HTEST (
+		 * 1 p_HTRO_CAR_NO => :P14_HTRO_CAR_NO,
+		 * 2 p_WARRANTY_START_DATE => :P14_WARRANTY_START,
+		 * 3 p_DEALER_ID => :P14_DEALER_ID,
+		 * 4 p_RETAIL_DATE => :P14_RETAIL_DATE,
+		 * 5 p_END_USER_TYPE => :P14_END_USER_TYPE,
+		 * 6 p_END_USER_TITLE => :P14_END_USER_TITLE,
+		 * 7 p_PAYMENT_TYPE => :P14_PAYMENT_TYPE,
+		 * 8 p_LEASING_COMPANY => :P14_LEASING_COMP,
+		 * 9 p_SCRAPPAGE => :P14_SCRAPPAGE,
+		 * 10 p_END_USER_NAME => :P14_USER_NAME,
+		 * 11 p_FIRST_NAME => :P14_FIRST_NAME,
+		 * 12 p_LAST_NAME => :P14_LAST_NAME,
+		 * 13 p_BIRTH_DATE => :P14_BIRTH_DATE,
+		 * 14 p_GENDER => :P14_GENDER,
+		 * 15 p_COMPANY => :P14_COMPANY,
+		 * 16 p_ADDRESS => '',
+		 * 17 p_ADDR_COUNTY_ABBRV => :P14_JUD_SECT,
+		 * 18 p_ADDR_TOWN_OR_CITY => :P14_ORAS,
+		 * 19 p_addr_street => :P14_STRADA,
+		 * 20 p_addr_no => :P14_NR,
+		 * 21 p_addr_building => :P14_BLOC,
+		 * 22 p_addr_entrance => :P14_SCARA,
+		 * 23 p_addr_floor => :P14_ETAJ,
+		 * 24 p_addr_appartment_no => :P14_APARTMANET,
+		 * 25 p_POSTAL_CODE => :P14_COD_POSTAL,
+		 * 26 p_EMAIL1 => :P14_EMAIL_1,
+		 * 27 p_EMAIL2 => :P14_EMAIL_2,
+		 * 28 p_MOBILE_PHONE1 => :P14_MOBILE_1,
+		 * 29 p_MOBILE_PHONE2 => :P14_MOBILE_2,
+		 * 30 p_MARKETING => :P14_FLEET,
+		 * 31 p_COMMENTS => :P14_COMMENTS);
+		 * ---
+		 * APPS.hnd_warranty_pkg.attach_documents@HTEST (
+		 * p_htro_car_no => :P14_HTRO_CAR_NO, int
+		 * p_file_name => :nume fisier, string
+		 * p_file_type => tipul fisierului (pv gdpr .... ), string
+		 * p_blob => blob
+		 * );
+		 */
+		String p_msgOut = "";
+		CallableStatement statement = null;
+		final String procedureCall =
+			"{call apps.hnd_warranty_pkg.create_warranty(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}";
+
+		final String procedureCall2 = "{call apps.hnd_warranty_pkg.attach_documents(?,?,?,?)}";
+		try {
+			statement = jdbcConnection.prepareCall(procedureCall);
+
+			System.out.println("params.size()=" + params.size());
+
+			for (int i = 0; i < params.size(); i++) {
+				if (i == 0 || i == 2) {
+					statement.setInt(i + 1, (int) params.get(i));
+				}
+				else if (i == 1 || i == 3 || i == 12) {
+					statement.setDate(i + 1, (Date) params.get(i));
+				}
+				else {
+					statement.setString(i + 1, (String) params.get(i));
+				}
+			}
+
+			statement.registerOutParameter(32, Types.VARCHAR);
+			statement.execute();
+			p_msgOut = statement.getString(32);
+
+			System.out.println("p_msgOut = " + p_msgOut);
+
+			if (p_msgOut != null)
+				if (!p_msgOut.equalsIgnoreCase("null")) {
+				System.out.println("p_msgOut = " + p_msgOut);
+				hndApp_log.error("GenerateWarranty - Error calling PLSQL procedure ");
+				throw new Exception("Exceptie la salvarea datelor");
+				}
+
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GenerateWarranty - Error closing SQL statement ", sqle);
+				sqle.printStackTrace();
+			}
+
+			statement = jdbcConnection.prepareCall(procedureCall2);
+
+			//List<Object> params2 = new ArrayList<Object>();
+
+			System.out.println("files.size) = " + files.size());
+
+			for (List<Object> params2 : files) {
+
+				//params2 = files.get(0);
+				System.out.println("params2.size) = " + params2.size());
+				System.out.println("params2.get(0) = " + params2.get(0));
+				System.out.println("params2.get(1) = " + params2.get(1));
+				System.out.println("params2.get(2) = " + params2.get(2));
+				System.out.println("params2.get(3) = " + params2.get(3));
+
+				Blob aBlob = jdbcConnection.createBlob();
+				aBlob.setBytes(1, (byte[]) params2.get(3));
+
+				statement.setInt(1, (int) params2.get(0));
+				statement.setString(2, (String) params2.get(1));
+				statement.setString(3, (String) params2.get(2));
+				statement.setBlob(4, aBlob);
+
+				statement.execute();
+				aBlob.free();
+
+			}
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("GenerateWarranty - Error calling PLSQL procedure ", sqle);
+			throw new Exception(sqle);
+		}
+		finally {
+			try {
+				if (statement != null && !statement.isClosed())
+					statement.close();
+			}
+			catch (SQLException sqle) {
+				hndApp_log.error("GenerateWarranty - Error closing SQL statement ", sqle);
+				sqle.printStackTrace();
+			}
+		}
+	}
+
+	private DBConnection() {
+
+		/*
+		 * try {
+		 * Class.forName(driver);
+		 * Properties properties = new Properties();
+		 * properties.put("user", userName);
+		 * properties.put("password", userPassword);
+		 * properties.put("defaultRowPrefetch", "100");
+		 * jdbcConnection = DriverManager.getConnection(dbURL, properties);
+		 * }
+		 * catch (ClassNotFoundException | SQLException ex) {
+		 * hndApp_log.error("DBConnection - Exception", ex);
+		 * ex.printStackTrace();
+		 * }
+		 * finally {
+		 * try {
+		 * if (jdbcConnection != null && !jdbcConnection.isClosed())
+		 * jdbcConnection.close();
+		 * }
+		 * catch (SQLException e) {
+		 * hndApp_log.
+		 * error("DBConnection - SQLException when closing DB connection", e);
+		 * e.printStackTrace();
+		 * }
+		 * }
+		 * private static String dbURL =
+		 * "jdbc:oracle:thin:@207.129.208.16:1522:TEST";
+		 * private static String userName = "XXDA";
+		 * private static String userPassword = "Honda123!";
+		 * private static String driver = "oracle.jdbc.driver.OracleDriver";
+		 */
+
+		Thread thread = Thread.currentThread();
+		// Get the thread's class loader. You'll reinstate it after using
+		// the data source you look up using JNDI
+		ClassLoader origLoader = thread.getContextClassLoader();
+		// Set Liferay's class loader on the thread
+		thread.setContextClassLoader(PortalClassLoaderUtil.getClassLoader());
+		try {
+			// Retrieve the name of the JNDI Datasource from
+			// portal-ext.properties
+			dsname = PropsUtil.get("jdbc.external.jndi.name");
+			// Look up the data source and connect to it
+			InitialContext iContext = new InitialContext();
+			// dataSource = (DataSource)
+			// iContext.lookup("java:comp/env/jdbc/CustomDBPoolShared");
+			dataSource = (DataSource) iContext.lookup("java:comp/env/" + dsname);
+			jdbcConnection = dataSource.getConnection();
+		}
+		catch (NamingException ne) {
+			ne.printStackTrace();
+		}
+		catch (SQLException sqle) {
+			hndApp_log.error("DBConnection - SQLException", sqle);
+			sqle.printStackTrace();
+		}
+		finally {
+			// Switch back to the original context class loader
+			thread.setContextClassLoader(origLoader);
+		}
+
+	}
+
+	private static final Log hndApp_log = LogFactoryUtil.getLog(DBConnection.class);
+
+	private DataSource dataSource;
+	private String dsname = null;
+	private Connection jdbcConnection;
+
+	private static final class SingletonHolder {
+
+		private static final DBConnection SINGLETON = new DBConnection();
+	}
+
+}

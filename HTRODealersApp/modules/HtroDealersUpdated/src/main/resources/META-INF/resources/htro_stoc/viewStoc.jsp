@@ -14,6 +14,16 @@
 	background: rgba(128, 128, 128, 0.33);
 	border: 1px solid #0A0A0C;
 }
+
+.dealer{
+	color: blue;
+	text-transform: uppercase;
+}
+
+.invoiced{
+	color: red;
+	text-transform: uppercase;
+}
 </style>
 
 <script type="text/javascript">
@@ -64,12 +74,14 @@ jQuery(document).ready(function() {
 		tipAutoveh = tipAutoveh.substring(0, tipAutoveh.length() - 1);
 
 		if (tipAutoveh.contains("Motociclete")) {
-			tipFinal = "Moto";
-			if (tipAutoveh.contains("Automobile")) {
-				tipFinal = ""; // gol  == toate 
-			}
+			tipFinal = "Moto";			
 		} else if (tipAutoveh.contains("Automobile")) {
 			tipFinal = "Auto";
+		} else if (tipAutoveh.contains("Toate")) {
+			tipFinal = ""; // gol  == toate 
+		}
+		if (tipAutoveh.contains("Automobile") && tipAutoveh.contains("Motociclete")){
+			tipFinal = ""; // gol  == toate  - contine dealeri multipli cu ambele tipuri de masini
 		}
 
 		System.out.println("ViewStoc - usrGrps dealerIdValue = " + dealerIdValue);
@@ -95,19 +107,21 @@ jQuery(document).ready(function() {
 	List<StocItem> stocItems1 = new ArrayList();
 
 	//System.out.println("TimeInfo before select = " + LocalTime.now(ZoneId.of("Europe/Bucharest")));
-
+	/*
 	if (tipAuto.equalsIgnoreCase("SelectAll")) {
 		if (culoareExterior.equalsIgnoreCase("SelectAll")) {
 			stocItems1 = DBConnection.getInstance().GetFilteredStocItems("", "", tipFinal);
 		} else {
 			stocItems1 = DBConnection.getInstance().GetFilteredStocItems("", culoareExterior, tipFinal);
 		}
-	} else {
-		if (culoareExterior.equalsIgnoreCase("SelectAll")) {
-			stocItems1 = DBConnection.getInstance().GetFilteredStocItems(tipAuto, "", tipFinal);
-		} else {
-			stocItems1 = DBConnection.getInstance().GetFilteredStocItems(tipAuto, culoareExterior, tipFinal);
-		}
+	} else 
+	*/
+		if (tipAuto != null && tipAuto.length() > 0) {
+			if (culoareExterior.equalsIgnoreCase("SelectAll")) {
+				stocItems1 = DBConnection.getInstance().GetFilteredStocItems(tipAuto, "", tipFinal);
+			} else {
+				stocItems1 = DBConnection.getInstance().GetFilteredStocItems(tipAuto, culoareExterior, tipFinal);
+			}
 	}
 
 	//System.out.println("TimeInfo after select = " + LocalTime.now(ZoneId.of("Europe/Bucharest")));
@@ -143,17 +157,12 @@ jQuery(document).ready(function() {
 <div class="container-fluid">
 
 	<aui:form action="<%=cautaURL%>" method="get" name="searchForm">
-
 		<liferay-portlet:renderURLParams varImpl="cautaURL" />
-
 		<div style="float: left; display: inline-block;">
-
 			<div id="tipAutodiv" style="display: inline-block;">
-
 				<aui:select id="tipAuto" inlineLabel="left" label="Tip Autovehicul" name="tipAuto" showEmptyOption="false"
 					onChange="<%=renderResponse.getNamespace() + "getTipAuto()"%>" value="InputSomething">
-
-					<aui:option selected="false" label="Afiseaza Toate Tipurile" value="SelectAll" />
+					<aui:option selected="false" label="Selecteaza un tip" value="" />
 					<%
 						List<String> tipAutoList = DBConnection.getInstance().GetStocTipAuto(tipFinal);
 								for (String tipa : tipAutoList) {
@@ -280,9 +289,10 @@ Liferay.provide(
 						<th>Culoare Interior</th>
 						<th>Observatii</th>
 						<th>Locatie</th>
+						<th>Dealer</th>
 						<th>Sosire in tara</th>
 						<th>Expirare rezervare</th>
-						<th>Expirare rezervare vehicul alternativ</th>
+						<!-- <th>Expirare rezervare vehicul alternativ</th> -->
 						<th>(*) Locatie vehicul alternativ</th>
 						<th>Sosire in tara veh. alternativ</th>
 						<th>Omologare Individuala</th>
@@ -298,13 +308,19 @@ Liferay.provide(
 									String reservation_end_date = "";
 									String location = "";
 									String arrival_date = "";
+									String dealerMasina = String.valueOf(stocItem.getRES_DEALER_ID());
+									String invoiced = String.valueOf(stocItem.getINVOICED());
+									String motoOrAuto = String.valueOf(stocItem.getPRODUCT_TYPE());
 
-									List<String> detaliiRez = DBConnection.getInstance().GetSecondRezDetails(htroCarNo);
-
-									if (!detaliiRez.isEmpty()) {
-										reservation_end_date = detaliiRez.get(0);
-										location = detaliiRez.get(1);
-										arrival_date = detaliiRez.get(2);
+									if (motoOrAuto.equalsIgnoreCase("auto"))
+									{
+										List<String> detaliiRez = DBConnection.getInstance().GetSecondRezDetails(htroCarNo);
+	
+										if (!detaliiRez.isEmpty()) {
+											reservation_end_date = detaliiRez.get(0);
+											location = detaliiRez.get(1);
+											arrival_date = detaliiRez.get(2);
+										}
 									}
 									// 	System.out.println("TimeInfo after = " + LocalTime.now(ZoneId.of("Europe/Bucharest")));
 
@@ -316,6 +332,8 @@ Liferay.provide(
 
 									boolean validateAction = false;
 									boolean showTime = false;
+									boolean isInvoiced = false;
+									boolean isCarAtDealer = false;
 									//validDealerId
 									
 									if (rezervata.equalsIgnoreCase("N")) {
@@ -328,7 +346,103 @@ Liferay.provide(
 											showTime = false;
 										}
 									}
+									
+									if (invoiced.equalsIgnoreCase("Y"))
+									{
+										isInvoiced = true;
+										isCarAtDealer = false;
+									}
+									
+									if (dealerIdValue.contains(dealerMasina))
+									{
+										if (isInvoiced)
+										{
+											isCarAtDealer = false; // colorare in rosu si ptr cele invoiced dar de la deler
+										}
+										else
+										{
+											isCarAtDealer = true; // colorare in albastru
+											isInvoiced = false;
+										}										
+									}
+									//System.out.println("Table data: dealerIdValue="+dealerIdValue + " , isCarAtDealer="+isCarAtDealer + " , isInvoiced="+ isInvoiced);
+									
 					%>
+					<c:if test="<%=isInvoiced%>">
+					<tr class="invoiced">
+						<td><c:if test="<%=showTime || !validDealerId%>">
+								<span style="white-space: nowrap"> Rezervare dezactivata!! </span>
+							</c:if> <c:if test="<%=validateAction && validDealerId%>">
+
+								<liferay-portlet:renderURL var="rezervaURL">
+									<portlet:param name="carNO" value="<%=String.valueOf(stocItem.getHTRO_CAR_NO())%>" />
+									<portlet:param name="rezTipAuto" value="<%=String.valueOf(stocItem.getTIP_AUTOVEHICUL())%>" />
+									<portlet:param name="rezCuloareExt" value="<%=String.valueOf(stocItem.getDESC_CULOARE_EXTERIOR())%>" />
+									<portlet:param name="rezCuloareInt" value="<%=String.valueOf(stocItem.getCULOARE_INTERIOR())%>" />
+									<portlet:param name="numeVanzator" value="<%=userFullName%>" />
+									<liferay-portlet:param name="mvcPath" value="/htro_actions/adaugaRezervare.jsp" />
+								</liferay-portlet:renderURL>
+
+								<span style="white-space: nowrap"> <liferay-ui:icon iconCssClass="icon-plus-sign" label="true" message="Rezerva"
+										url="<%=rezervaURL.toString()%>" />
+								</span>
+							</c:if></td>
+						<td><%=stocItem.getAN_FABRICATIE_CIV()%></td>
+						<td><%=stocItem.getTIP_AUTOVEHICUL()%></td>
+						<td><%=stocItem.getCOD_CULOARE_EXTERIOR()%></td>
+						<td><%=stocItem.getDESC_CULOARE_EXTERIOR()%></td>
+						<td><%=stocItem.getVOPSEA_METALIZATA()%></td>
+						<td><%=stocItem.getCULOARE_INTERIOR()%></td>
+						<td><%=stocItem.getOBSERVATII()%></td>
+						<td><%=stocItem.getLOCATIE()%></td>
+						<td><%=stocItem.getDEALER_NAME()%></td>
+						<td><%=stocItem.getLUNA_SOSIRE_IN_TARA()%></td>
+						<td><%=stocItem.getDATA_EXPIRARE_REZ()%></td>
+						<%-- <td><%=reservation_end_date%></td> --%>
+						<td><%=location%></td>
+						<td><%=arrival_date%></td>
+						<td><%=stocItem.getOMOLOGARE_IND()%></td>
+					</tr>
+					</c:if>
+					
+					<c:if test="<%=isCarAtDealer%>">
+					<tr class="dealer">
+						<td><c:if test="<%=showTime || !validDealerId%>">
+								<span style="white-space: nowrap"> Rezervare dezactivata!! </span>
+							</c:if> <c:if test="<%=validateAction && validDealerId%>">
+
+								<liferay-portlet:renderURL var="rezervaURL">
+									<portlet:param name="carNO" value="<%=String.valueOf(stocItem.getHTRO_CAR_NO())%>" />
+									<portlet:param name="rezTipAuto" value="<%=String.valueOf(stocItem.getTIP_AUTOVEHICUL())%>" />
+									<portlet:param name="rezCuloareExt" value="<%=String.valueOf(stocItem.getDESC_CULOARE_EXTERIOR())%>" />
+									<portlet:param name="rezCuloareInt" value="<%=String.valueOf(stocItem.getCULOARE_INTERIOR())%>" />
+									<portlet:param name="numeVanzator" value="<%=userFullName%>" />
+									<liferay-portlet:param name="mvcPath" value="/htro_actions/adaugaRezervare.jsp" />
+								</liferay-portlet:renderURL>
+
+								<span style="white-space: nowrap"> <liferay-ui:icon iconCssClass="icon-plus-sign" label="true" message="Rezerva"
+										url="<%=rezervaURL.toString()%>" />
+								</span>
+							</c:if></td>
+						<td><%=stocItem.getAN_FABRICATIE_CIV()%></td>
+						<td><%=stocItem.getTIP_AUTOVEHICUL()%></td>
+						<td><%=stocItem.getCOD_CULOARE_EXTERIOR()%></td>
+						<td><%=stocItem.getDESC_CULOARE_EXTERIOR()%></td>
+						<td><%=stocItem.getVOPSEA_METALIZATA()%></td>
+						<td><%=stocItem.getCULOARE_INTERIOR()%></td>
+						<td><%=stocItem.getOBSERVATII()%></td>
+						<td><%=stocItem.getLOCATIE()%></td>
+						<td><%=stocItem.getDEALER_NAME()%></td>
+						<td><%=stocItem.getLUNA_SOSIRE_IN_TARA()%></td>
+						<td><%=stocItem.getDATA_EXPIRARE_REZ()%></td>
+						<%-- <td><%=reservation_end_date%></td> --%>
+						<td><%=location%></td>
+						<td><%=arrival_date%></td>
+						<td><%=stocItem.getOMOLOGARE_IND()%></td>
+					</tr>
+					</c:if>
+					
+					<c:if test="<%= !isInvoiced && !isCarAtDealer%>">
 					<tr>
 						<td><c:if test="<%=showTime || !validDealerId%>">
 								<span style="white-space: nowrap"> Rezervare dezactivata!! </span>
@@ -349,19 +463,21 @@ Liferay.provide(
 							</c:if></td>
 						<td><%=stocItem.getAN_FABRICATIE_CIV()%></td>
 						<td><%=stocItem.getTIP_AUTOVEHICUL()%></td>
-						<td><%=stocItem.getCOD_CULOARE_EXTERIO()%></td>
+						<td><%=stocItem.getCOD_CULOARE_EXTERIOR()%></td>
 						<td><%=stocItem.getDESC_CULOARE_EXTERIOR()%></td>
 						<td><%=stocItem.getVOPSEA_METALIZATA()%></td>
 						<td><%=stocItem.getCULOARE_INTERIOR()%></td>
 						<td><%=stocItem.getOBSERVATII()%></td>
 						<td><%=stocItem.getLOCATIE()%></td>
+						<td><%=stocItem.getDEALER_NAME()%></td>
 						<td><%=stocItem.getLUNA_SOSIRE_IN_TARA()%></td>
 						<td><%=stocItem.getDATA_EXPIRARE_REZ()%></td>
-						<td><%=reservation_end_date%></td>
+						<%-- <td><%=reservation_end_date%></td> --%>
 						<td><%=location%></td>
 						<td><%=arrival_date%></td>
 						<td><%=stocItem.getOMOLOGARE_IND()%></td>
 					</tr>
+					</c:if>
 					<%
 						}
 					%>
@@ -377,9 +493,10 @@ Liferay.provide(
 						<th>Culoare Interior</th>
 						<th>Observatii</th>
 						<th>Locatie</th>
+						<th>Dealer</th>
 						<th>Sosire in tara</th>
 						<th>Expirare rezervare</th>
-						<th>Expirare rezervare vehicul alternativ</th>
+						<!-- <th>Expirare rezervare vehicul alternativ</th> -->
 						<th>(*) Locatie vehicul alternativ</th>
 						<th>Sosire in tara veh. alternativ</th>
 						<th>Omologare Individuala</th>

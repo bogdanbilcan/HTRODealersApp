@@ -39,10 +39,23 @@
 <fullyQualifiedTypeName name="java.util.Map"/>
 <fullyQualifiedTypeName name="com.liferay.portal.kernel.model.User"/>
 <fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.BuiltinFormats"/>
-<fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.CreationHelper"/>
 <fullyQualifiedTypeName name="org.apache.poi.xssf.usermodel.XSSFCreationHelper"/>
 <fullyQualifiedTypeName name="java.time.format.DateTimeFormatter"/>
 <fullyQualifiedTypeName name="java.text.SimpleDateFormat"/>
 <fullyQualifiedTypeName name="java.util.Locale"/>
 <fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.Cell"/>
+<fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.DataFormat"/>
+<fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.CreationHelper"/>
+<fullyQualifiedTypeName name="com.zaxxer.hikari.HikariDataSource"/>
+<fullyQualifiedTypeName name="com.liferay.portal.kernel.util.PortalClassLoaderUtil"/>
+<fullyQualifiedTypeName name="com.liferay.portal.kernel.util.PropsUtil"/>
+<fullyQualifiedTypeName name="javax.naming.InitialContext"/>
+<fullyQualifiedTypeName name="javax.sql.DataSource"/>
+<fullyQualifiedTypeName name="javax.naming.NamingException"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="com.liferay.portal.kernel.upload.UploadPortletRequest"/>
+<fullyQualifiedTypeName name="com.liferay.portal.kernel.util.FileUtil"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="javax.sql.rowset.serial.SerialBlob"/>
+<fullyQualifiedTypeName name="java.sql.Blob"/>
 </qualifiedTypeNameHistroy>

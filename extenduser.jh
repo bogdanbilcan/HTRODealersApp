@@ -1,0 +1,5 @@
+entity User {
+	birthday LocalDate
+	gender String
+	mobileNo Integer
+}
